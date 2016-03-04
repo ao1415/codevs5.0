@@ -211,19 +211,177 @@ vector<MoveCommand> DogEscape::getSpeedCommand(int playerId, const Status& statu
 	return command;
 }
 
-vector<MoveCommand> DogEscape::escapeSearch(int playerId, const Status& status, int nest) {
+vector<MoveCommand> DogEscape::getCommand2(int playerId, const Status& status) {
 	vector<MoveCommand> command;
 
-	struct Data {
-		vector<MoveCommand> com;
-		vector<Point> points;
-	};
+	auto ninjas = status.getNinjas();
+	auto dogs = status.getDogs();
+	auto stage = status.getStage();
+
+	set<int> ninja_near_dogId;
+
+	//マンハッタン距離5未満の犬を列挙する
+	for (const auto& dog : dogs)
+	{
+		int r = manhattan(ninjas[playerId].point, dog.second.point);
+		if (r < 5)
+		{
+			ninja_near_dogId.insert(dog.second.id);
+		}
+	}
+
+	if (!ninja_near_dogId.empty())
+	{
+		try
+		{
+			command = escapeSearch(playerId, status, 2);
+		}
+		catch (logic_error) {
+			throw logic_error("");
+		}
+	}
+
+	return command;
+}
+vector<MoveCommand> DogEscape::getSpeedCommand2(int playerId, const Status& status) {
+	vector<MoveCommand> command;
+
+	try
+	{
+		command = escapeSearch(playerId, status, 3);
+	}
+	catch (logic_error) {
+		throw logic_error("");
+	}
+
+	return command;
+}
+
+vector<MoveCommand> DogEscape::escapeSearch(int playerId, const Status& status, size_t nest) {
+	vector<MoveCommand> command;
 
 	queue<Data> que;
 
+	auto ninjaPoint1 = status.getNinjas()[playerId].point;
+	auto ninjaPoint2 = status.getNinjas()[(playerId + 1) % 2].point;
+	auto dogs = status.getDogs();
+	auto stage = status.getStage();
 
+	{
+		Data d;
+		d.points.push_back(ninjaPoint1);
+		d.stage = status.getStage();
+		que.push(d);
+	}
 
+	for (size_t n = 0; n < nest; n++)
+	{
+		queue<Data> nextQue;
+		while (!que.empty())
+		{
+			for (int i = 0; i < 5; i++)
+			{
+				Data data = que.front();
+				if (MoveCommand(i) == MoveCommand::N)
+				{
+					data.com.push_back(MoveCommand(i));
+					data.points.push_back(data.points.back());
+					nextQue.push(data);
+				}
+				else
+				{
+					const Point p = Stage::moveSimulation(data.points.back(), ninjaPoint2, MoveCommand(i), data.stage, dogs);
+					if (data.points.back() == p)
+						continue;
+
+					data.com.push_back(MoveCommand(i));
+					data.points.push_back(p);
+					nextQue.push(data);
+				}
+			}
+			que.pop();
+		}
+		que = nextQue;
+	}
+
+	Data maxData;
+	int maxScore = INT32_MIN;
+	while (!que.empty())
+	{
+		const Data data = que.front();
+
+		int score = escapeEvaluation(data, status);
+		if (maxScore < score)
+		{
+			maxData = data;
+			maxScore = score;
+		}
+
+		que.pop();
+	}
+
+	if (maxScore == 0)
+	{
+		throw logic_error("");
+	}
+
+	cerr << maxScore << endl;
+	cerr << pointToString(maxData.points.back()) << endl;
+	for (const auto& c : maxData.com)
+		cerr << MoveCommandChar[int(c)];
+	cerr << endl;
+
+	command = maxData.com;
+	if (command.size() > nest) command.resize(nest);
 	return command;
+}
+
+int DogEscape::escapeEvaluation(const Data& data, const Status& status) {
+	int score = 0;
+
+	auto dogs = status.getDogs();
+	auto soulPoints = status.getSoulPoints();
+
+	bool hitFlag = false;
+	for (const auto& d : dogs)
+	{
+		int r = manhattan(data.points.back(), d.second.point);
+		//接触する
+		if (r <= 1)
+			return 0;
+	}
+
+	const int SoulWeight = 100;//忍者ソウルを取得した時の点数
+	const int NoneWeight = 50;//移動先が壁に阻まれていない時の点数
+
+	int soulNum = 0;
+	int noneNum = 0;
+
+	for (const auto& sp : soulPoints)
+	{
+		for (const auto& p : data.points)
+		{
+			if (sp == p)
+			{
+				soulNum++;
+				break;
+			}
+		}
+	}
+
+	for (const auto& dp : directionPoint)
+	{
+		const Point p = data.points.back() + dp;
+
+		if (data.stage.getState(p) == Stage::State::None)
+		{
+			noneNum++;
+		}
+	}
+
+	score = soulNum*SoulWeight + noneNum*NoneWeight;
+
+	return score;
 }
 
 bool DogEscape::checkFit(int playerId, const Status& status, const vector<MoveCommand> command) {

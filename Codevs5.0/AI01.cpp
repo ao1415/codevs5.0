@@ -11,7 +11,8 @@ void AI01::think(const Status& my, const Status& enemy) {
 		try
 		{
 			//二人目の時にきちんと更新する
-			move[i] = dogEscape.getCommand(i, my);
+			//move[i] = dogEscape.getCommand(i, my);
+			move[i] = dogEscape.getCommand2(i, my);
 		}
 		catch (logic_error e)
 		{
@@ -83,10 +84,10 @@ vector<MoveCommand> AI01::useSpeed(const Status& my) {
 
 	try
 	{
-		//逃げ方に問題あり
-		//壁を認識していない?
-		command1 = dogEscape.getSpeedCommand(0, my);
-		command2 = dogEscape.getSpeedCommand(1, my);
+		//command1 = dogEscape.getSpeedCommand(0, my);
+		//command2 = dogEscape.getSpeedCommand(1, my);
+		command1 = dogEscape.getSpeedCommand2(0, my);
+		command2 = dogEscape.getSpeedCommand2(1, my);
 
 	}
 	catch (logic_error) {

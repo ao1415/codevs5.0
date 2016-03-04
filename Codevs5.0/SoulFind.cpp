@@ -157,7 +157,7 @@ vector<MoveCommand> SoulFind::getCommand2(int playerId, const Status& status) {
 	}
 	const Point checkPoint[4] = { Point(0,-1),Point(-1,0),Point(1,0),Point(0,1) };
 
-	while (1)
+	while (true)
 	{
 		queue<Data> nextQue;
 		while (!que.empty())
@@ -171,7 +171,8 @@ vector<MoveCommand> SoulFind::getCommand2(int playerId, const Status& status) {
 				if (cd.point == sp)
 				{
 					command = cd.commands;
-					command.resize(2);
+					if (command.size() > 2)
+						command.resize(2);
 					return command;
 				}
 			}
@@ -183,7 +184,7 @@ vector<MoveCommand> SoulFind::getCommand2(int playerId, const Status& status) {
 
 				if (search[pp.x][pp.y] == Stage::State::None)
 				{
-					data.point = Stage::moveSimulation(data.point, MoveCommand(i), data.stage);
+					data.point = Stage::moveSimulation(data.point, status.getNinjas()[(playerId + 1) % 2].point, MoveCommand(i), data.stage, status.getDogs());
 					if (que.front().point != data.point)
 					{
 						search[data.point.x][data.point.y] = Stage::State::Wall;
