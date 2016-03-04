@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="ソース ファイル\Control">
+      <UniqueIdentifier>{e39a3a57-977a-4365-901f-2ff6604af327}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Status">
+      <UniqueIdentifier>{6dc45ea8-3093-46ac-91a0-7a3ab77330ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\AI">
+      <UniqueIdentifier>{3633e79e-a993-44f4-82a0-d4154a82abb6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\AI\AI01">
+      <UniqueIdentifier>{41c8c888-6436-4231-aa0b-848dfa58c066}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Control\DogEscape">
+      <UniqueIdentifier>{5d00bcb3-9cc5-4b18-826a-c44d2a4355b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Control\DogEscape\DogSimulation">
+      <UniqueIdentifier>{92057d7d-c897-43e0-bf82-0f6674e4e612}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Control\SoulFind">
+      <UniqueIdentifier>{729903b1-30bc-4fbf-af31-cd475bf71a5d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Base.hpp">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Control.hpp">
+      <Filter>ソース ファイル\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="AI01.hpp">
+      <Filter>ソース ファイル\AI\AI01</Filter>
+    </ClInclude>
+    <ClInclude Include="DogEscape.hpp">
+      <Filter>ソース ファイル\Control\DogEscape</Filter>
+    </ClInclude>
+    <ClInclude Include="DogSimulation.hpp">
+      <Filter>ソース ファイル\Control\DogEscape\DogSimulation</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage.hpp">
+      <Filter>ソース ファイル\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="Status.hpp">
+      <Filter>ソース ファイル\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseAI.hpp">
+      <Filter>ソース ファイル\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="SoulFind.hpp">
+      <Filter>ソース ファイル\Control\SoulFind</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Base.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Control.cpp">
+      <Filter>ソース ファイル\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="AI01.cpp">
+      <Filter>ソース ファイル\AI\AI01</Filter>
+    </ClCompile>
+    <ClCompile Include="DogEscape.cpp">
+      <Filter>ソース ファイル\Control\DogEscape</Filter>
+    </ClCompile>
+    <ClCompile Include="DogSimulation.cpp">
+      <Filter>ソース ファイル\Control\DogEscape\DogSimulation</Filter>
+    </ClCompile>
+    <ClCompile Include="SoulFind.cpp">
+      <Filter>ソース ファイル\Control\SoulFind</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
