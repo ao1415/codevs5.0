@@ -15,7 +15,7 @@ int main() {
 	{
 		//1‡300•b
 		//1ƒ^[ƒ“20•b‚Ü‚Å
-		cerr << turn++ << endl;
+		cerr << ++turn << endl;
 		control.think();
 		control.output();
 		cout.flush();

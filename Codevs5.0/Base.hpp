@@ -14,7 +14,9 @@
 #include <memory>
 #include <algorithm>
 #include <climits>
+
 #include <random>
+#include <chrono>
 
 using namespace std;
 
@@ -23,6 +25,14 @@ const int StageY = 17;
 const int NinjutsuNum = 8;
 
 typedef array<int, NinjutsuNum> NinjutsuArray;
+
+/*
+auto start = chrono::system_clock::now();
+auto end = chrono::system_clock::now();
+auto dur = end - start;
+auto msec = chrono::duration_cast<chrono::milliseconds>(dur).count();
+cerr << "time:" << msec << endl;
+*/
 
 struct Point {
 	Point() { x = y = 0; }

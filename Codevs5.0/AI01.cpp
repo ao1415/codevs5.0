@@ -12,7 +12,7 @@ void AI01::think(const Status& my, const Status& enemy) {
 		{
 			//ìÒêlñ⁄ÇÃéûÇ…Ç´ÇøÇÒÇ∆çXêVÇ∑ÇÈ
 			//move[i] = dogEscape.getCommand(i, my);
-			move[i] = dogEscape.getCommand2(i, my);
+			move[i] = dogEscape.getCommand2(i, status);
 		}
 		catch (logic_error e)
 		{
@@ -22,7 +22,7 @@ void AI01::think(const Status& my, const Status& enemy) {
 			{
 				try
 				{
-					move[i] = useNinjutsuD(my, e.what(), i);
+					move[i] = useNinjutsuD(my, status, e.what(), i);
 				}
 				catch (invalid_argument)
 				{
@@ -32,16 +32,31 @@ void AI01::think(const Status& my, const Status& enemy) {
 		}
 		if (move[i].empty())
 		{
-			move[i] = soulFind.getCommand2(i, my);
+			move[i] = soulFind.getCommand2(i, status);
 		}
+
+		Point p = status.getNinjas()[i].point;
+		Stage stage = status.getStage();
+		for (const auto& c : move[i]) {
+			p = Stage::moveSimulation(p, status.getNinjas()[(i + 1) % 2].point, c, stage, status.getDogs());
+		}
+		array<Character, 2> nextNinjas = status.getNinjas();
+		nextNinjas[i] = Character{ i, p };
+		if (ninjutsuFlag)
+		{
+			if (ninjutsuString[0] == '7')
+				status.eraseDogs(status.getNinjas()[i].point);
+		}
+		status.setStage(stage);
+		status.setNinjas(nextNinjas);
 	}
 
 	characterMove = move;
 }
 
-vector<MoveCommand> AI01::useNinjutsuD(const Status& my, const string& mes, int playerId) {
+vector<MoveCommand> AI01::useNinjutsuD(const Status& fist, const Status& second, const string& mes, int playerId) {
 	vector<MoveCommand> command;
-	const int ninryoku = my.getNinryoku();
+	const int ninryoku = second.getNinryoku();
 
 	if (mes == "no_move")
 	{
@@ -49,7 +64,7 @@ vector<MoveCommand> AI01::useNinjutsuD(const Status& my, const string& mes, int 
 		{
 			try
 			{
-				command = useStroke_M(my, playerId);
+				command = useStroke_M(fist, playerId);
 				return command;
 			}
 			catch (logic_error) {}
@@ -61,7 +76,7 @@ vector<MoveCommand> AI01::useNinjutsuD(const Status& my, const string& mes, int 
 		{
 			try
 			{
-				useSpeed(my);
+				useSpeed(fist);
 			}
 			catch (invalid_argument) { throw invalid_argument(""); }
 			catch (logic_error) {}
@@ -70,7 +85,7 @@ vector<MoveCommand> AI01::useNinjutsuD(const Status& my, const string& mes, int 
 		{
 			try
 			{
-				command = useRotatinCut(my, playerId);
+				command = useRotatinCut(second, playerId);
 			}
 			catch (invalid_argument) { throw invalid_argument(""); }
 		}

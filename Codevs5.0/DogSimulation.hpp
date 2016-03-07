@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Status.hpp"
-
+#include "Stage.hpp"
+//#include "Status.hpp"
+/*
 class Dog {
 public:
 
@@ -20,15 +21,17 @@ private:
 	int range = INT32_MAX;
 	Character character;
 };
-
+*/
 class DogSimulation {
 public:
 
-	const Status dogSimulation(Status status, const vector<MoveCommand>& c1, const vector<MoveCommand>& c2);
-	const Status dogSimulation(Status status, const Point& point);
+	//const Status dogSimulation(Status status, const vector<MoveCommand>& c1, const vector<MoveCommand>& c2);
+	//const Status dogSimulation(Status status, const Point& point);
+
+	const map<int, Character> dogsSimulation(const Point& player1, const Point& player2, const Stage& stage, map<int, Character> dogs);
 
 private:
 
-
+	int getRange(const Point& player1, const Point& player2, const Stage& stage, const Point& dogPoint);
 
 };

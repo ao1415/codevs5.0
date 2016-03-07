@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Stage.hpp"
+#include "DogSimulation.hpp"
 
 class Status {
 public:

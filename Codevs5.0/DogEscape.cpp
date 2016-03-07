@@ -306,11 +306,17 @@ vector<MoveCommand> DogEscape::escapeSearch(int playerId, const Status& status, 
 
 	Data maxData;
 	int maxScore = INT32_MIN;
+	//int count = 0;
+	//const size_t qsize = que.size();
+	//cerr << qsize;
 	while (!que.empty())
 	{
 		const Data data = que.front();
 
 		int score = escapeEvaluation(data, status);
+
+		//if (score == 0) count++;
+
 		if (maxScore < score)
 		{
 			maxData = data;
@@ -319,17 +325,21 @@ vector<MoveCommand> DogEscape::escapeSearch(int playerId, const Status& status, 
 
 		que.pop();
 	}
+	//cerr << ":" << count << "(" << qsize - count << ")" << endl;
 
 	if (maxScore == 0)
 	{
+		cerr << "•ß‚Ü‚é!" << endl;
 		throw logic_error("");
 	}
 
+	/*
 	cerr << maxScore << endl;
 	cerr << pointToString(maxData.points.back()) << endl;
 	for (const auto& c : maxData.com)
 		cerr << MoveCommandChar[int(c)];
 	cerr << endl;
+	//*/
 
 	command = maxData.com;
 	if (command.size() > nest) command.resize(nest);

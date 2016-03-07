@@ -45,7 +45,7 @@ private:
 	SoulFind soulFind;
 	array<vector<MoveCommand>, 2> characterMove;
 
-	vector<MoveCommand> useNinjutsuD(const Status& my, const string& mes, int playerId);
+	vector<MoveCommand> useNinjutsuD(const Status& fist, const Status& second, const string& mes, int playerId);
 
 	vector<MoveCommand> useSpeed(const Status& my);
 	vector<MoveCommand> useStroke_M(const Status& my, int playerId);
