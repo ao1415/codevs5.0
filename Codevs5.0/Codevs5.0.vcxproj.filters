@@ -30,6 +30,9 @@
     <Filter Include="ソース ファイル\Control\SoulFind">
       <UniqueIdentifier>{729903b1-30bc-4fbf-af31-cd475bf71a5d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\AI\AI02">
+      <UniqueIdentifier>{35e01724-b947-4f68-ad89-bb05d3f0d71e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base.hpp">
@@ -59,6 +62,9 @@
     <ClInclude Include="SoulFind.hpp">
       <Filter>ソース ファイル\Control\SoulFind</Filter>
     </ClInclude>
+    <ClInclude Include="AI02.hpp">
+      <Filter>ソース ファイル\AI\AI02</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Base.cpp">
@@ -81,6 +87,9 @@
     </ClCompile>
     <ClCompile Include="SoulFind.cpp">
       <Filter>ソース ファイル\Control\SoulFind</Filter>
+    </ClCompile>
+    <ClCompile Include="AI02.cpp">
+      <Filter>ソース ファイル\AI\AI02</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

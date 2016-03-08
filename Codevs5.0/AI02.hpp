@@ -4,13 +4,10 @@
 #include "DogEscape.hpp"
 #include "SoulFind.hpp"
 
-//回転斬でしのぐタイプ
-class AI01 : public BaseAI {
+//先読みするタイプ
+class AI02 : public BaseAI {
 public:
 
-	AI01() {
-
-	}
 
 	void think(const Status& my, const Status& enemy);
 
@@ -47,11 +44,5 @@ private:
 	DogEscape dogEscape;
 	SoulFind soulFind;
 	array<vector<MoveCommand>, 2> characterMove;
-
-	vector<MoveCommand> useNinjutsuD(const Status& fist, const Status& second, const string& mes, int playerId);
-
-	vector<MoveCommand> useSpeed(const Status& my);
-	vector<MoveCommand> useStroke_M(const Status& my, int playerId);
-	vector<MoveCommand> useRotatinCut(const Status& my, int playerId);
 
 };

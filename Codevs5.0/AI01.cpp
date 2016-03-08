@@ -10,14 +10,10 @@ void AI01::think(const Status& my, const Status& enemy) {
 	{
 		try
 		{
-			//二人目の時にきちんと更新する
-			//move[i] = dogEscape.getCommand(i, my);
 			move[i] = dogEscape.getCommand2(i, status);
 		}
 		catch (logic_error e)
 		{
-			//雷撃・超加速を追加する
-
 			if (!ninjutsuFlag)
 			{
 				try
