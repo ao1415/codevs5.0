@@ -14,39 +14,10 @@ public:
 
 	void think(const Status& my, const Status& enemy);
 
-	void output() {
-
-		if (ninjutsuFlag)
-		{
-			cout << "3" << endl;
-			cout << ninjutsuString << endl;
-		}
-		else
-			cout << "2" << endl;
-
-		for (const auto& c : characterMove[0])
-			cout << MoveCommandChar[int(c)];
-		cout << endl;
-
-		for (const auto& c : characterMove[1])
-			cout << MoveCommandChar[int(c)];
-		cout << endl;
-
-		characterMove[0].clear();
-		characterMove[1].clear();
-
-		ninjutsuFlag = false;
-		ninjutsuString = "";
-	}
-
 private:
-
-	bool ninjutsuFlag = false;
-	string ninjutsuString;
 
 	DogEscape dogEscape;
 	SoulFind soulFind;
-	array<vector<MoveCommand>, 2> characterMove;
 
 	vector<MoveCommand> useNinjutsuD(const Status& fist, const Status& second, const string& mes, int playerId);
 

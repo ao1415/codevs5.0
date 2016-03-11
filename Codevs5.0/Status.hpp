@@ -94,6 +94,8 @@ public:
 	void setStage(const Stage& s) { stage = s; }
 	void setNinjas(const array<Character, 2>& n) { ninjas = n; }
 	void setDogs(const map<int, Character>& d) { dogs = d; }
+	void setNinryoku(const int& n) { ninryoku = n; }
+	void setSoulPoints(const vector<Point>& s) { soulPoints = s; }
 
 private:
 
