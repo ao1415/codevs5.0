@@ -72,6 +72,7 @@ public:
 		return true;
 	}
 
+	static const NinjutsuArray& getNinjutsuCost() { return ninjutsuCost; }
 	static int getNinjutsuCost(NinjutsuCommand n) { return ninjutsuCost[int(n)]; }
 	const Stage& getStage() const { return stage; }
 	const NinjutsuArray& getNinjutsuNumber() const { return ninjutsuNumber; }
@@ -80,6 +81,15 @@ public:
 	const array<Character, 2>& getNinjas() const { return ninjas; }
 	const map<int, Character>& getDogs() const { return dogs; }
 	const vector<Point>& getSoulPoints() const { return soulPoints; }
+
+	const StageArray getStageDogStatus() const {
+		StageArray s = stage.getStage();
+
+		for (const auto& dog : dogs)
+			s[dog.second.point.x][dog.second.point.y] = Stage::State::Dog;
+
+		return s;
+	}
 
 	void eraseDogs(const Point& p) {
 		for (auto it = dogs.begin(); it != dogs.end();)
@@ -93,6 +103,7 @@ public:
 
 	void setStage(const Stage& s) { stage = s; }
 	void setNinjas(const array<Character, 2>& n) { ninjas = n; }
+	void setNinjas(const Character& p1, const Character& p2) { ninjas[0] = p1; ninjas[1] = p2; }
 	void setDogs(const map<int, Character>& d) { dogs = d; }
 	void setNinryoku(const int& n) { ninryoku = n; }
 	void setSoulPoints(const vector<Point>& s) { soulPoints = s; }

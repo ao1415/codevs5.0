@@ -243,6 +243,19 @@ vector<MoveCommand> DogEscape::getCommand2(int playerId, const Status& status) {
 
 	return command;
 }
+vector<MoveCommand> DogEscape::getAvatarCommand2(int playerId, const Status& status, const Point& point) {
+	vector<MoveCommand> command;
+
+	try
+	{
+		command = escapeSearchAvatar(playerId, status, 2, point);
+	}
+	catch (logic_error) {
+		throw logic_error("");
+	}
+
+	return command;
+}
 vector<MoveCommand> DogEscape::getSpeedCommand2(int playerId, const Status& status) {
 	vector<MoveCommand> command;
 
@@ -306,9 +319,9 @@ vector<MoveCommand> DogEscape::escapeSearch(int playerId, const Status& status, 
 
 	Data maxData;
 	int maxScore = INT32_MIN;
-	//int count = 0;
+	int count = 0;
 	//const size_t qsize = que.size();
-	//cerr << qsize;
+	//cerr << "size:" << qsize << endl;
 	while (!que.empty())
 	{
 		const Data data = que.front();
@@ -327,7 +340,7 @@ vector<MoveCommand> DogEscape::escapeSearch(int playerId, const Status& status, 
 	}
 	//cerr << ":" << count << "(" << qsize - count << ")" << endl;
 
-	if (maxScore == 0)
+	if (maxScore == INT32_MIN)
 	{
 		cerr << "ïﬂÇ‹ÇÈ!" << endl;
 		throw logic_error("");
@@ -337,9 +350,86 @@ vector<MoveCommand> DogEscape::escapeSearch(int playerId, const Status& status, 
 	cerr << maxScore << endl;
 	cerr << pointToString(maxData.points.back()) << endl;
 	for (const auto& c : maxData.com)
-		cerr << MoveCommandChar[int(c)];
+	cerr << MoveCommandChar[int(c)];
 	cerr << endl;
 	//*/
+
+	command = maxData.com;
+	if (command.size() > nest) command.resize(nest);
+	return command;
+}
+
+vector<MoveCommand> DogEscape::escapeSearchAvatar(int playerId, const Status& status, size_t nest, const Point& point) {
+	vector<MoveCommand> command;
+
+	queue<Data> que;
+
+	auto ninjaPoint1 = status.getNinjas()[playerId].point;
+	auto ninjaPoint2 = status.getNinjas()[(playerId + 1) % 2].point;
+	auto dogs = status.getDogs();
+	auto stage = status.getStage();
+
+	{
+		Data d;
+		d.points.push_back(ninjaPoint1);
+		d.stage = status.getStage();
+		que.push(d);
+	}
+
+	for (size_t n = 0; n < nest; n++)
+	{
+		queue<Data> nextQue;
+		while (!que.empty())
+		{
+			for (int i = 0; i < 5; i++)
+			{
+				Data data = que.front();
+				if (MoveCommand(i) == MoveCommand::N)
+				{
+					data.com.push_back(MoveCommand(i));
+					data.points.push_back(data.points.back());
+					nextQue.push(data);
+				}
+				else
+				{
+					const Point p = Stage::moveSimulation(data.points.back(), ninjaPoint2, MoveCommand(i), data.stage, dogs);
+					if (data.points.back() == p)
+						continue;
+
+					data.com.push_back(MoveCommand(i));
+					data.points.push_back(p);
+					nextQue.push(data);
+				}
+			}
+			que.pop();
+		}
+		que = nextQue;
+	}
+
+	Data maxData;
+	int maxScore = INT32_MIN;
+	int count = 0;
+
+	while (!que.empty())
+	{
+		const Data data = que.front();
+
+		int score = escapeEvaluationAvatar(data, status, point);
+
+		if (maxScore < score)
+		{
+			maxData = data;
+			maxScore = score;
+		}
+
+		que.pop();
+	}
+
+	if (maxScore == INT32_MIN)
+	{
+		cerr << "ïﬂÇ‹ÇÈ!" << endl;
+		throw logic_error("");
+	}
 
 	command = maxData.com;
 	if (command.size() > nest) command.resize(nest);
@@ -358,19 +448,21 @@ int DogEscape::escapeEvaluation(const Data& data, const Status& status) {
 		int r = manhattan(data.points.back(), d.second.point);
 		//ê⁄êGÇ∑ÇÈ
 		if (r <= 1)
-			return 0;
+			return INT32_MIN;
 	}
 
 	const int SoulWeight = 100;//îEé“É\ÉEÉãÇéÊìæÇµÇΩéûÇÃì_êî
 	const int NoneWeight = 50;//à⁄ìÆêÊÇ™ï«Ç…ëjÇ‹ÇÍÇƒÇ¢Ç»Ç¢éûÇÃì_êî
+	const int SoulRange = 10;//îEé“É\ÉEÉãÇ∆ÇÃãóó£ÇÃì_êî
 
 	int soulNum = 0;
 	int noneNum = 0;
-
+	int minSoulRange = INT32_MAX;
 	for (const auto& sp : soulPoints)
 	{
 		for (const auto& p : data.points)
 		{
+			minSoulRange = min(manhattan(p, sp), minSoulRange);
 			if (sp == p)
 			{
 				soulNum++;
@@ -389,7 +481,63 @@ int DogEscape::escapeEvaluation(const Data& data, const Status& status) {
 		}
 	}
 
-	score = soulNum*SoulWeight + noneNum*NoneWeight;
+
+
+	score = soulNum*SoulWeight + noneNum*NoneWeight - minSoulRange*SoulRange;
+
+	return score;
+}
+
+int DogEscape::escapeEvaluationAvatar(const Data& data, const Status& status, const Point& point) {
+	int score = 0;
+
+	auto dogs = status.getDogs();
+	auto soulPoints = status.getSoulPoints();
+	DogSimulation simu;
+	const auto nextDogs = simu.dogsSimulation(point, point, status.getStage(), dogs);
+
+	bool hitFlag = false;
+	for (const auto& d : nextDogs)
+	{
+		int r = manhattan(data.points.back(), d.second.point);
+		//ê⁄êGÇ∑ÇÈ
+		if (r < 1)
+			return INT32_MIN;
+	}
+
+	const int SoulWeight = 100;//îEé“É\ÉEÉãÇéÊìæÇµÇΩéûÇÃì_êî
+	const int NoneWeight = 50;//à⁄ìÆêÊÇ™ï«Ç…ëjÇ‹ÇÍÇƒÇ¢Ç»Ç¢éûÇÃì_êî
+	const int SoulRange = 10;//îEé“É\ÉEÉãÇ∆ÇÃãóó£ÇÃì_êî
+
+	int soulNum = 0;
+	int noneNum = 0;
+	int minSoulRange = INT32_MAX;
+	for (const auto& sp : soulPoints)
+	{
+		for (const auto& p : data.points)
+		{
+			minSoulRange = min(manhattan(p, sp), minSoulRange);
+			if (sp == p)
+			{
+				soulNum++;
+				break;
+			}
+		}
+	}
+
+	for (const auto& dp : directionPoint)
+	{
+		const Point p = data.points.back() + dp;
+
+		if (data.stage.getState(p) == Stage::State::None)
+		{
+			noneNum++;
+		}
+	}
+
+
+
+	score = soulNum*SoulWeight + noneNum*NoneWeight - minSoulRange*SoulRange;
 
 	return score;
 }

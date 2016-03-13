@@ -7,8 +7,8 @@ class Control {
 public:
 
 	Control() {
-		//ai.reset(new AI01());
-		ai.reset(new AI02());
+		ai.reset(new AI01());
+		//ai.reset(new AI02());
 	}
 
 	void reset() {
