@@ -165,7 +165,7 @@ const Status DogSimulation::dogSimulation(Status status, const Point& point) {
 }
 */
 
-const map<int, Character> DogSimulation::dogsSimulation(const Point& player1, const Point& player2, const Stage& stage, map<int, Character> dogs) {
+const map<int, Character> DogSimulation::dogsSimulation(const Point& player1, const Point& player2, const Stage& stage, const map<int, Character> dogs) {
 	map<int, Character> nextDogs;
 
 	map<int, vector<int>> dogRange;
@@ -183,10 +183,10 @@ const map<int, Character> DogSimulation::dogsSimulation(const Point& player1, co
 	{
 		for (const auto& d : dog.second)
 		{
-			nextDogs[d] = Character{ d,dogs[d].point };
+			nextDogs[d] = Character{ d,dogs.at(d).point };
 			for (const auto& dire : directionPoint)
 			{
-				const Point p = dogs[d].point + dire;
+				const Point p = dogs.at(d).point + dire;
 
 				if (stage.getState(p) == Stage::State::None)
 				{
@@ -194,7 +194,7 @@ const map<int, Character> DogSimulation::dogsSimulation(const Point& player1, co
 					{
 						if (dog.first > getRange(player1, player2, stage, p))
 						{
-							dogStage[dogs[d].point.x][dogs[d].point.y] = Stage::State::None;
+							dogStage[dogs.at(d).point.x][dogs.at(d).point.y] = Stage::State::None;
 							dogStage[p.x][p.y] = Stage::State::Dog;
 
 							nextDogs[d] = Character{ d,p };

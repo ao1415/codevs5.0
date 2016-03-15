@@ -15,9 +15,42 @@ void AI01::think(const Status& my, const Status& enemy) {
 		{
 			move[i] = dogEscape.getCommand2(i, status);
 
-			if (my.getNinryoku() > defenceSort[3].first)
+			int ninryoku = my.getNinryoku() - defenceSort[3].first;
+			if (ninryoku > 0)
 			{
-				useNinjutsuA(enemy, my.getNinryoku() - defenceSort[4].first);
+				if (ninryoku >= Status::getNinjutsuCost(NinjutsuCommand::RotatinCut))
+				{
+					const auto ninjas = my.getNinjas();
+					const Stage stage(my.getStageDogStatus());
+					int dogCount[2] = { 0 };
+					for (int j = 0; j < 2; j++)
+					{
+						for (int y = -1; y < 2; y++)
+						{
+							for (int x = -1; x < 2; x++)
+							{
+								if (stage.getState(ninjas[j].point + Point(x, y)) == Stage::State::Dog)
+								{
+									dogCount[j]++;
+								}
+							}
+						}
+					}
+					if (dogCount[i] >= dogCount[1 - i])
+					{
+						if (dogCount[i] >= 3)
+						{
+							cerr << "‰ñ“]Ža!" << endl;
+							ninjutsuFlag = true;
+							ninjutsuString = "7 " + to_string(i);
+						}
+					}
+
+				}
+				else
+				{
+					useNinjutsuA(enemy, ninryoku);
+				}
 			}
 		}
 		catch (logic_error e)
@@ -98,15 +131,16 @@ void AI01::think(const Status& my, const Status& enemy) {
 
 void AI01::setCost(const NinjutsuArray& cost) {
 
-	defenceSort[0] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::RotatinCut)], NinjutsuCommand::RotatinCut);
-	defenceSort[1] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::Avatar_M)], NinjutsuCommand::Avatar_M);
-	defenceSort[2] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::Stroke_M)], NinjutsuCommand::Stroke_M);
-	defenceSort[3] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::Rockfall_M)], NinjutsuCommand::Rockfall_M);
-	defenceSort[4] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::Speed)], NinjutsuCommand::Speed);
+	defenceSort[0] = pair<int, NinjutsuCommand>(int(0.8 * cost[int(NinjutsuCommand::RotatinCut)]), NinjutsuCommand::RotatinCut);
+	defenceSort[1] = pair<int, NinjutsuCommand>(int(1.0 * cost[int(NinjutsuCommand::Avatar_M)]), NinjutsuCommand::Avatar_M);
+	defenceSort[2] = pair<int, NinjutsuCommand>(int(0.9 * cost[int(NinjutsuCommand::Stroke_M)]), NinjutsuCommand::Stroke_M);
+	defenceSort[3] = pair<int, NinjutsuCommand>(int(1.0 * cost[int(NinjutsuCommand::Rockfall_M)]), NinjutsuCommand::Rockfall_M);
+	defenceSort[4] = pair<int, NinjutsuCommand>(int(1.0 * cost[int(NinjutsuCommand::Speed)]), NinjutsuCommand::Speed);
 
 	attackSort[0] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::Avatar_E)], NinjutsuCommand::Avatar_E);
 	attackSort[1] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::Stroke_E)], NinjutsuCommand::Stroke_E);
 	attackSort[2] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::Rockfall_E)], NinjutsuCommand::Rockfall_E);
+	attackSort[3] = pair<int, NinjutsuCommand>(cost[int(NinjutsuCommand::RotatinCut)], NinjutsuCommand::RotatinCut);
 
 	stable_sort(defenceSort.begin(), defenceSort.end());
 	stable_sort(attackSort.begin(), attackSort.end());
@@ -116,10 +150,10 @@ void AI01::setCost(const NinjutsuArray& cost) {
 vector<MoveCommand> AI01::useNinjutsuD(const Status& fist, const Status& second, const string& mes, int playerId) {
 	vector<MoveCommand> command;
 	const int ninryoku = second.getNinryoku();
-
+	const NinjutsuArray& cost = fist.getNinjutsuCost();
 	for (const auto& ninjutsu : defenceSort)
 	{
-		if (ninryoku >= ninjutsu.first)
+		if (ninryoku >= cost[int(ninjutsu.second)])
 		{
 			switch (ninjutsu.second)
 			{
@@ -363,7 +397,7 @@ void AI01::useNinjutsuA(const Status& enemy, const int ninryoku) {
 			switch (ninjutsu.second)
 			{
 			case NinjutsuCommand::Rockfall_E:
-				cerr << "“G—ŽÎ‚ðŽŽ‚Ý‚½" << endl;
+				//cerr << "“G—ŽÎ‚ðŽŽ‚Ý‚½" << endl;
 
 				str = useRockfall_E(enemy);
 				if (str != "")
@@ -378,7 +412,7 @@ void AI01::useNinjutsuA(const Status& enemy, const int ninryoku) {
 				//cerr << "“G—‹Œ‚‚ðŽŽ‚Ý‚½" << endl;
 				break;
 			case NinjutsuCommand::Avatar_E:
-				cerr << "“G•ªg‚ðŽŽ‚Ý‚½" << endl;
+				//cerr << "“G•ªg‚ðŽŽ‚Ý‚½" << endl;
 
 				str = useAvatar_E(enemy);
 				if (str != "")
@@ -453,6 +487,25 @@ string AI01::useAvatar_E(const Status& enemy) {
 	for (const auto ninja : ninjas)
 	{
 		int count = 0;
+		int dogCount = 0, wallCount = 0, noneCount = 0;
+		for (const auto& dir : directionPoint)
+		{
+			switch (stage.getState(ninja.point + dir))
+			{
+			case Stage::State::Dog: dogCount++; break;
+			case Stage::State::None: noneCount++; break;
+			case Stage::State::Rock:
+			case Stage::State::Wall:
+				wallCount++; break;
+			}
+		}
+
+		if (dogCount >= noneCount)
+		{
+			str = "6 " + to_string(ninja.point.y) + " " + to_string(ninja.point.x);
+		}
+		return "";
+
 		for (int i = -3; i < 4; i++)
 		{
 			for (int j = -3; j < 4; j++)

@@ -33,6 +33,6 @@ private:
 	string useAvatar_E(const Status& enemy);
 
 	array<pair<int, NinjutsuCommand>, 5> defenceSort;
-	array<pair<int, NinjutsuCommand>, 3> attackSort;
+	array<pair<int, NinjutsuCommand>, 4> attackSort;
 	Point ninjutsuPoint;
 };

@@ -431,6 +431,7 @@ vector<MoveCommand> DogEscape::escapeSearchAvatar(int playerId, const Status& st
 		throw logic_error("");
 	}
 
+
 	command = maxData.com;
 	if (command.size() > nest) command.resize(nest);
 	return command;
@@ -452,8 +453,8 @@ int DogEscape::escapeEvaluation(const Data& data, const Status& status) {
 	}
 
 	const int SoulWeight = 100;//忍者ソウルを取得した時の点数
-	const int NoneWeight = 50;//移動先が壁に阻まれていない時の点数
-	const int SoulRange = 10;//忍者ソウルとの距離の点数
+	const int NoneWeight = 75;//移動先が壁に阻まれていない時の点数
+	const int SoulRange = 30;//忍者ソウルとの距離の点数
 
 	int soulNum = 0;
 	int noneNum = 0;
@@ -494,7 +495,7 @@ int DogEscape::escapeEvaluationAvatar(const Data& data, const Status& status, co
 	auto dogs = status.getDogs();
 	auto soulPoints = status.getSoulPoints();
 	DogSimulation simu;
-	const auto nextDogs = simu.dogsSimulation(point, point, status.getStage(), dogs);
+	const auto nextDogs = simu.dogsSimulation(point, point, data.stage.getStage(), dogs);
 
 	bool hitFlag = false;
 	for (const auto& d : nextDogs)
