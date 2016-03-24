@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="AI01.hpp" />
     <ClInclude Include="AI02.hpp" />
+    <ClInclude Include="AI03.hpp" />
     <ClInclude Include="Base.hpp" />
     <ClInclude Include="BaseAI.hpp" />
     <ClInclude Include="Control.hpp" />
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="AI01.cpp" />
     <ClCompile Include="AI02.cpp" />
+    <ClCompile Include="AI03.cpp" />
     <ClCompile Include="Base.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="DogEscape.cpp" />

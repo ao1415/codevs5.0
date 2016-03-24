@@ -142,7 +142,7 @@ vector<A02::MoveData> AI02::getMove(const Status& status) {
 								else if (p4 == (*it)) { soulNum++; it = soulPoints.erase(it); }
 								else it++;
 							}
-							const auto nextDogs = dogSimulation.dogsSimulation(p2, p4, stage4, dogs);
+							const auto nextDogs = dogSimulation.simulation(p2, p4, stage4, dogs);
 
 							sta.setNinjas(Character{ 0,p2 }, Character{ 0,p4 });
 							sta.setStage(stage4);

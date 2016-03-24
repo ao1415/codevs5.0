@@ -283,8 +283,7 @@ int DogEscape::escapeEvaluationAvatar(const Data& data, const Status& status, co
 
 	auto dogs = status.getDogs();
 	auto soulPoints = status.getSoulPoints();
-	DogSimulation simu;
-	const auto nextDogs = simu.dogsSimulation(point, point, data.stage.getStage(), dogs);
+	const auto nextDogs = DogSimulation::simulation(point, point, data.stage.getStage(), dogs);
 
 	bool hitFlag = false;
 	for (const auto& d : nextDogs)

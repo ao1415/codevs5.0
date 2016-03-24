@@ -5,10 +5,10 @@
 class DogSimulation {
 public:
 
-	const map<int, Character> dogsSimulation(const Point& player1, const Point& player2, const Stage& stage, const map<int, Character> dogs);
+	static const map<int, Character> simulation(const Point& player1, const Point& player2, const Stage& stage, const map<int, Character> dogs);
 
 private:
 
-	int getRange(const Point& player1, const Point& player2, const Stage& stage, const Point& dogPoint);
+	static int getRange(const Point& player1, const Point& player2, const Stage& stage, const Point& dogPoint);
 
 };

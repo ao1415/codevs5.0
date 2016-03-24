@@ -295,7 +295,7 @@ vector<MoveCommand> AI01::useAvatar_M(const Status& my) {
 	const auto ninjas = my.getNinjas();
 	const auto stage = my.getStage();
 	const auto dogs = my.getDogs();
-	const auto nextDogs = dogSimulation.dogsSimulation(ninjas[0].point, ninjas[0].point, stage, dogs);
+	const auto nextDogs = dogSimulation.simulation(ninjas[0].point, ninjas[0].point, stage, dogs);
 
 	auto func = [&](const Point& point) {
 		command1 = dogEscape.getAvatarCommand2(0, my, point);

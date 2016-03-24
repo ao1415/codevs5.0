@@ -2,13 +2,15 @@
 
 #include "AI01.hpp"
 #include "AI02.hpp"
+#include "AI03.hpp"
 
 class Control {
 public:
 
 	Control() {
-		ai.reset(new AI01());
+		//ai.reset(new AI01());
 		//ai.reset(new AI02());
+		ai.reset(new AI03());
 	}
 
 	void reset() {
