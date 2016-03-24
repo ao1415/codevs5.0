@@ -49,6 +49,12 @@ void AI03::moveThink(const Status& my) {
 	size_t beamIndex = 0;
 	size_t nextbeamIndex = 0;
 
+	{
+		Data data;
+		data.status = my;
+		beam[beamIndex++] = data;
+	}
+
 	const auto ninryoku = my.getNinryoku();
 
 	auto movePatton = [&](int nest, size_t i, const Data& d) {
@@ -128,7 +134,7 @@ void AI03::moveThink(const Status& my) {
 				}
 			}
 
-			if (dogCount >= 3)
+			if (dogCount >= 1)
 			{
 				data.status.setNinryoku(ninryoku - Status::getNinjutsuCost(NinjutsuCommand::RotatinCut));
 				data.status.eraseDogs(ninjas[i].point);
