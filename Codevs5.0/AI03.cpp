@@ -134,7 +134,7 @@ void AI03::moveThink(const Status& my) {
 				}
 			}
 
-			if (dogCount >= 1)
+			if (dogCount >= 3)
 			{
 				data.status.setNinryoku(ninryoku - Status::getNinjutsuCost(NinjutsuCommand::RotatinCut));
 				data.status.eraseDogs(ninjas[i].point);
