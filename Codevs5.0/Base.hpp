@@ -70,5 +70,7 @@ enum class NinjutsuCommand {
 
 int manhattan(const Point& p1, const Point& p2);
 const Point getRunCommandPoint(Point p, const vector<MoveCommand>& com);
-
+//(x,y)
 const string pointToString(const Point& p);
+//y x
+const string pointToString2(const Point& p);

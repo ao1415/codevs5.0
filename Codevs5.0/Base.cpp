@@ -20,3 +20,6 @@ const Point getRunCommandPoint(Point p, const vector<MoveCommand>& com) {
 const string pointToString(const Point& p) {
 	return "(" + to_string(p.x) + "," + to_string(p.y) + ")";
 }
+const string pointToString2(const Point& p) {
+	return to_string(p.y) + " " + to_string(p.x);
+}
