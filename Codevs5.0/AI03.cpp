@@ -1,13 +1,7 @@
 #include "AI03.hpp"
-bool flag = true;
-void AI03::think(const Status& my, const Status& enemy) {
 
-	if (flag)
-	{
-		checkHit(my, 3);
-		flag = false;
-	}
-	//moveThink(my);
+void AI03::think(const Status& my, const Status& enemy) {
+	moveThink(my);
 }
 
 void AI03::moveThink(const Status& my) {
@@ -29,6 +23,7 @@ void AI03::moveThink(const Status& my) {
 	};
 
 	vector<Data> beam;
+	beam.reserve(BeamWidth);
 
 	{
 		Data data;
@@ -39,6 +34,7 @@ void AI03::moveThink(const Status& my) {
 	For(nest, SearchNest)
 	{
 		vector<Data> nextBeam;
+		nextBeam.reserve(BeamWidth * 21 * 21);
 		for (const auto& d : beam)
 		{
 			for (const auto& com1 : Command2)
@@ -166,28 +162,24 @@ bool AI03::checkHit(const Status& status, int nest) {
 
 	For(i, 2)
 	{
-		cerr << "player:" << i << endl;
-		queue<Point> que;
 		//7éËêÊÇì«Ç‹Ç»ÇØÇÍÇŒëÂè‰ïv
-		/*array<Point, 49> arr;
+		array<Point, 49> arr;
 		array<Point, 49> nextarr;
 		size_t arrIndex = 0;
-		size_t nextarrIndex = 0;*/
+		size_t nextarrIndex = 0;
 
 		if (stageArr[i][ninjas[i].point.x][ninjas[i].point.y] == Stage::State::Dog)
 			return true;
 
 		stageArr[i][ninjas[i].point.x][ninjas[i].point.y] = Stage::State::Rock;
-		que.push(ninjas[i].point);
-		//arr[arrIndex++] = ninjas[i].point;
+		arr[arrIndex++] = ninjas[i].point;
 
 		for (int j = 0; j < nest + 1; j++)
 		{
-			/*nextarrIndex = 0;
+			nextarrIndex = 0;
 			for (size_t k = 0; k < arrIndex; k++)
 			{
 				const Point sp = arr[k];
-				cerr << pointToString(sp) << ",";
 				for (const auto& dire : directionPoint)
 				{
 					const Point p = sp + dire;
@@ -196,7 +188,7 @@ bool AI03::checkHit(const Status& status, int nest) {
 					case Stage::State::None:
 					case Stage::State::Soul:
 					case Stage::State::Player:
-						nextque.push(p);
+						nextarr[nextarrIndex++] = p;
 						stageArr[i][p.x][p.y] = Stage::State::Rock;
 						break;
 					case Stage::State::Dog:
@@ -205,41 +197,11 @@ bool AI03::checkHit(const Status& status, int nest) {
 					}
 				}
 			}
-			*/
-			queue<Point> nextque;
-			while (!que.empty())
-			{
-				const Point sp = que.front();
-				cerr << pointToString(sp) << ",";
-				que.pop();
-				for (const auto& dire : directionPoint)
-				{
-					const Point p = sp + dire;
-					switch (stageArr[i][p.x][p.y])
-					{
-					case Stage::State::None:
-					case Stage::State::Soul:
-					case Stage::State::Player:
-						nextque.push(p);
-						stageArr[i][p.x][p.y] = Stage::State::Rock;
-						break;
-					case Stage::State::Dog:
-						return true;
-						break;
-					}
-				}
-			}
-			cerr << endl;
-			que = nextque;
+			
+			arr = nextarr;
+			arrIndex = nextarrIndex;
 		}
-		cerr << endl;
 	}
-	//for (const auto dog : dogs)
-	//{
-	//	if (manhattan(ninjas[0].point, dog.second.point) <= 1) return true;
-	//	if (manhattan(ninjas[1].point, dog.second.point) <= 1) return true;
-	//}
-
 	return false;
 }
 

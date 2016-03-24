@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <functional>
 #include <climits>
 
 #include <random>
