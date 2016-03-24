@@ -1,57 +1,5 @@
 #include "SoulFind.hpp"
 
-vector<MoveCommand> SoulFind::getCommand(int playerId, const Status& status) {
-	vector<MoveCommand> command;
-
-	auto soulPoints = status.getSoulPoints();
-	if (soulPoints.empty()) return command;
-
-	const Point point = status.getNinjas()[playerId].point;
-
-	int num = 0;
-	int range = manhattan(point, soulPoints[0]);
-
-	for (int i = 1; i < int(soulPoints.size()); i++)
-	{
-		int r = manhattan(point, soulPoints[i]);
-
-		if (range > r)
-		{
-			range = r;
-			num = i;
-		}
-	}
-	const Point d = soulPoints[num] - point;
-
-	command = move(playerId, status, d);
-
-	if (command.empty())
-	{
-		command.resize(2);
-		auto stage = status.getStage();
-		for (int i = 0; i < 4; i++)
-		{
-			Stage stage01(stage.getStage());
-			const Point p1 = stage.moveSimulation(point, MoveCommand(i), stage01);
-			if (p1 != point)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					Stage stage02(stage01.getStage());
-					const Point p2 = stage.moveSimulation(p1, MoveCommand(j), stage02);
-					if (p2 != p1)
-					{
-						command[0] = MoveCommand(i);
-						command[1] = MoveCommand(j);
-					}
-				}
-			}
-		}
-	}
-
-	return command;
-}
-
 vector<MoveCommand> SoulFind::move(int playerId, const Status& status, const Point& d) {
 	vector<MoveCommand> command;
 

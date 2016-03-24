@@ -5,7 +5,6 @@
 class SoulFind {
 public:
 
-	vector<MoveCommand> getCommand(int playerId, const Status& status);
 	vector<MoveCommand> getCommand2(int playerId, const Status& status);
 
 private:

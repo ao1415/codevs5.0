@@ -271,7 +271,7 @@ vector<MoveCommand> AI01::useStroke_M(const Status& my, int playerId) {
 
 			try
 			{
-				command = dogEscape.getCommand(playerId, deleStatus);
+				command = dogEscape.getCommand2(playerId, my);
 
 				cerr << "!—‹Œ‚!" << endl;
 				ninjutsuString = "3 " + to_string(p.y) + " " + to_string(p.x);
@@ -375,7 +375,7 @@ vector<MoveCommand> AI01::useRotatinCut(const Status& my, int playerId) {
 	my02.eraseDogs(my.getNinjas()[playerId].point);
 	try
 	{
-		command = dogEscape.getCommand(playerId, my02);
+		command = dogEscape.getCommand2(playerId, my02);
 	}
 	catch (logic_error) {}
 
