@@ -801,7 +801,7 @@ void AI03::defenceThink(const Status & status) {
 			case NinjutsuCommand::Stroke_M:
 				cerr << "Ž©—‹Œ‚‚ðŽŽ‚Ý‚½" << endl;
 
-				//if (defenceStroke(status)) return;
+				if (defenceStroke(status)) return;
 
 				break;
 			case NinjutsuCommand::Avatar_M:
@@ -1091,8 +1091,9 @@ bool AI03::defenceAvatar(const Status & status) {
 				const auto nextDogs = DogSimulation::simulation(avatarPoint, avatarPoint, sta.getStage(), dogs);
 				sta.setDogs(nextDogs);
 
-				const int score = int(getScore(sta, nest, data.ninjutsuStr)*percent);
-				
+				//const int score = int(getScore(sta, -1, data.ninjutsuStr)*percent);
+				const int score = getScore(sta, -1, data.ninjutsuStr);
+
 				data.status = sta;
 				data.commands[nest] = command;
 				if (score <= INT16_MIN)
@@ -1155,7 +1156,6 @@ bool AI03::defenceAvatar(const Status & status) {
 
 	}
 
-	cerr << "s:" << beam[0].score << endl;
 	if (beam[0].score <= INT16_MIN)
 		return false;
 
