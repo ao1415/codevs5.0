@@ -43,6 +43,8 @@ private:
 
 	void defenceThink(const Status& status);
 	bool defenceSpeed(const Status& status);
+	bool defenceRockfall(const Status& status);
+	bool defenceStroke(const Status& status);
 	bool defenceAvatar(const Status& status);
 	bool defenceRotatinCut(const Status& status);
 
