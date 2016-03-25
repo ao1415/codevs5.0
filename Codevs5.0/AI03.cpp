@@ -1,10 +1,32 @@
 #include "AI03.hpp"
 
+const string Command2[] = { "NN","NU","NL","NR","ND","UU","UL","UR","UD","LU","LL","LR","LD","RU","RL","RR","RD","DU","DL","DR","DD" };
+const string Command3[] = { "NNN","NUU","NUL","NUR","NUD","NLU","NLL","NLR","NLD","NRU","NRL","NRR","NRD","NDU","NDL","NDR","NDD","UUU","UUL","UUR","UUD","ULU","ULL","ULR","ULD","URU","URL","URR","URD","UDU","UDL","UDR","UDD","LUU","LUL","LUR","LUD","LLU","LLL","LLR","LLD","LRU","LRL","LRR","LRD","LDU","LDL","LDR","LDD","RUU","RUL","RUR","RUD","RLU","RLL","RLR","RLD","RRU","RRL","RRR","RRD","RDU","RDL","RDR","RDD","DUU","DUL","DUR","DUD","DLU","DLL","DLR","DLD","DRU","DRL","DRR","DRD","DDU","DDL","DDR","DDD" };
+
+struct Data {
+	Status status;
+	array<array<string, 2>, SearchNest> commands;
+	int score = 0;
+	string ninjutsuStr = "";
+
+	const bool operator<(const Data& d) const { return this->score < d.score; }
+};
+
+array<Data, BeamWidth> beam;
+array<Data, BeamWidth> nextbeam;
+
 void AI03::think(const Status& my, const Status& enemy) {
 
 	setCost(Status::getNinjutsuCost());
 
-	moveThink(my);
+	try
+	{
+		moveThink(my);
+	}
+	catch (logic_error e)
+	{
+		defenceThink(my);
+	}
 }
 
 void AI03::setCost(const NinjutsuArray& cost) {
@@ -27,25 +49,6 @@ void AI03::setCost(const NinjutsuArray& cost) {
 
 void AI03::moveThink(const Status& my) {
 
-	const string Command2[] = { "NN","NU","NL","NR","ND","UU","UL","UR","UD","LU","LL","LR","LD","RU","RL","RR","RD","DU","DL","DR","DD" };
-	const string Command3[] = { "NNN","NUU","NUL","NUR","NUD","NLU","NLL","NLR","NLD","NRU","NRL","NRR","NRD","NDU","NDL","NDR","NDD","UUU","UUL","UUR","UUD","ULU","ULL","ULR","ULD","URU","URL","URR","URD","UDU","UDL","UDR","UDD","LUU","LUL","LUR","LUD","LLU","LLL","LLR","LLD","LRU","LRL","LRR","LRD","LDU","LDL","LDR","LDD","RUU","RUL","RUR","RUD","RLU","RLL","RLR","RLD","RRU","RRL","RRR","RRD","RDU","RDL","RDR","RDD","DUU","DUL","DUR","DUD","DLU","DLL","DLR","DLD","DRU","DRL","DRR","DRD","DDU","DDL","DDR","DDD" };
-
-	int maxScore = INT32_MIN;
-
-	const size_t BeamWidth = 300;
-	const size_t SearchNest = 3;
-
-	struct Data {
-		Status status;
-		array<array<string, 2>, SearchNest> commands;
-		int score = 0;
-		string ninjutsuStr = "";
-
-		const bool operator<(const Data& d) const { return this->score < d.score; }
-	};
-
-	array<Data, BeamWidth> beam;
-	array<Data, BeamWidth> nextbeam;
 	size_t beamIndex = 0;
 	size_t nextbeamIndex = 0;
 
@@ -66,10 +69,55 @@ void AI03::moveThink(const Status& my) {
 				Status status = move(data.status, com1, com2);
 				const array<string, 2> command = { com1,com2 };
 
-				const int score = getScore(status, nest);
+				const int score = getScore(status, nest, data.ninjutsuStr);
 
 				data.status = status;
 				data.commands[nest] = command;
+				if (score == INT16_MIN)
+					data.score = INT16_MIN;
+				else
+					data.score += score;
+
+				for (size_t j = 0; j < BeamWidth; j++)
+				{
+					if (j >= nextbeamIndex)
+					{
+						nextbeam[nextbeamIndex++] = data;
+						break;
+					}
+					else if (nextbeam[j] < data)
+					{
+						for (size_t k = min(nextbeamIndex, BeamWidth - 1); k > j; k--)
+						{
+							nextbeam[k] = nextbeam[k - 1];
+						}
+						nextbeamIndex++;
+						nextbeam[j] = data;
+						break;
+					}
+				}
+			}
+		}
+	};
+
+	auto usedSpeed = [&](int nest, size_t i, const Data& d) {
+		for (const auto& com1 : Command3)
+		{
+			for (const auto& com2 : Command3)
+			{
+				Data data = d;
+				Status status = move(data.status, com1, com2);
+				const array<string, 2> command = { com1,com2 };
+
+				const auto ninryoku = data.status.getNinryoku();
+				data.status.setNinryoku(ninryoku - Status::getNinjutsuCost(NinjutsuCommand::Speed));
+
+				data.ninjutsuStr = "0";
+				const int score = getScore(status, nest, data.ninjutsuStr);
+
+				data.status = status;
+				data.commands[nest] = command;
+
 				if (score == INT16_MIN)
 					data.score = INT16_MIN;
 				else
@@ -110,6 +158,7 @@ void AI03::moveThink(const Status& my) {
 				{
 					stage[p.x][p.y] = Stage::State::None;
 					data.status.setNinryoku(ninryoku - Status::getNinjutsuCost(NinjutsuCommand::Stroke_M));
+
 					data.status.setStage(Stage(stage));
 					data.ninjutsuStr = "3 " + pointToString2(p);
 
@@ -152,6 +201,7 @@ void AI03::moveThink(const Status& my) {
 		for (size_t i = 0; i < beamIndex; i++)
 		{
 			movePatton(nest, i, beam[i]);
+
 			if (nest == 0)
 			{
 				if (ninryoku >= defenceNinjutsuSort[4].first)
@@ -166,6 +216,10 @@ void AI03::moveThink(const Status& my) {
 					{
 						usedStroke(nest, i, beam[i]);
 					}
+					if (useNinryoku >= Status::getNinjutsuCost(NinjutsuCommand::Speed))
+					{
+						usedSpeed(nest, i, beam[i]);
+					}
 				}
 			}
 		}
@@ -177,7 +231,8 @@ void AI03::moveThink(const Status& my) {
 
 	if (beam[0].score <= INT16_MIN)
 	{
-
+		throw logic_error("p‚ðŽg‚¤");
+		return;
 	}
 
 	outputCommand[0] = beam[0].commands[0][0];
@@ -332,19 +387,198 @@ bool AI03::checkHit(const Status& status, int nest) {
 	return false;
 }
 
-int AI03::getScore(const Status & status, int nest) {
+int AI03::getScore(const Status & status, int nest, const string& ninjutsuStr) {
 
 	if (checkHit(status, nest))
 		return INT16_MIN;
 
-	int score = 0;
+	const int BaseScore = -INT16_MIN - 1;
 
-	score += getScore_Ninryoku(status) * 30;
+	const int NinryokuMax = 600;
+	const int SoulRangeMax = 27;
+	const int DogRangeMax = 27;
+	const int DeadStoneMax = 208;
+	const int NinjaRangeMax = 27;
+	const int DogCountMax = 300;
+
+
+	int score = 0;
+	int m = 1;
+
+	score += getScore_Ninryoku(status) * 40;
 	score -= getScore_SoulRange(status) * 200;
 	score += getScore_DogRange(status) * 50;
 	score -= getScore_DeadStone(status) * 100;
-	score += getScore_NinjaRange(status) * 40;
+	score += getScore_NinjaRange(status) * 80;
 	score -= getScore_DogCount(status) * 70;
+
+	m = NinryokuMax * 40
+		+ SoulRangeMax * 200
+		+ DogRangeMax * 50
+		+ DeadStoneMax * 100
+		+ NinjaRangeMax * 80
+		+ DogCountMax * 70;
+	score = int(BaseScore*score / m);
+
+	if (ninjutsuStr == "")
+	{
+		score += getScore_Ninryoku(status) * 40;
+		score -= getScore_SoulRange(status) * 200;
+		score += getScore_DogRange(status) * 50;
+		score -= getScore_DeadStone(status) * 100;
+		score += getScore_NinjaRange(status) * 80;
+		score -= getScore_DogCount(status) * 70;
+
+		m = NinryokuMax * 40
+			+ SoulRangeMax * 200
+			+ DogRangeMax * 50
+			+ DeadStoneMax * 100
+			+ NinjaRangeMax * 80
+			+ DogCountMax * 70;
+		score = int(BaseScore*score / m);
+	}
+	else
+	{
+		switch (ninjutsuStr[0])
+		{
+		case '0'://’´‚‘¬
+			score += getScore_Ninryoku(status) * 150;
+			score -= getScore_SoulRange(status) * 100;
+			score += getScore_DogRange(status) * 20;
+			score -= getScore_DeadStone(status) * 100;
+			score += getScore_NinjaRange(status) * 40;
+			score -= getScore_DogCount(status) * 70;
+
+			m = NinryokuMax * 150
+				+ SoulRangeMax * 100
+				+ DogRangeMax * 20
+				+ DeadStoneMax * 100
+				+ NinjaRangeMax * 40
+				+ DogCountMax * 70;
+			score = int(BaseScore*score / m);
+
+			break;
+		case '1'://Ž©—ŽÎ
+			score += getScore_Ninryoku(status) * 80;
+			score -= getScore_SoulRange(status) * 200;
+			score += getScore_DogRange(status) * 150;
+			score -= getScore_DeadStone(status) * 100;
+			score += getScore_NinjaRange(status) * 80;
+			score -= getScore_DogCount(status) * 70;
+
+			m = NinryokuMax * 80
+				+ SoulRangeMax * 200
+				+ DogRangeMax * 150
+				+ DeadStoneMax * 100
+				+ NinjaRangeMax * 80
+				+ DogCountMax * 70;
+			score = int(BaseScore*score / m);
+
+			break;
+		case '2'://“G—ŽÎ
+			score += getScore_Ninryoku(status) * 40;
+			score -= getScore_SoulRange(status) * 200;
+			score += getScore_DogRange(status) * 50;
+			score -= getScore_DeadStone(status) * 100;
+			score += getScore_NinjaRange(status) * 80;
+			score -= getScore_DogCount(status) * 70;
+
+			m = NinryokuMax * 40
+				+ SoulRangeMax * 200
+				+ DogRangeMax * 50
+				+ DeadStoneMax * 100
+				+ NinjaRangeMax * 80
+				+ DogCountMax * 70;
+			score = int(BaseScore*score / m);
+
+			break;
+		case '3'://Ž©—‹Œ‚
+			score += getScore_Ninryoku(status) * 160;
+			score -= getScore_SoulRange(status) * 180;
+			score += getScore_DogRange(status) * 50;
+			score -= getScore_DeadStone(status) * 150;
+			score += getScore_NinjaRange(status) * 80;
+			score -= getScore_DogCount(status) * 70;
+
+			m = NinryokuMax * 160
+				+ SoulRangeMax * 180
+				+ DogRangeMax * 50
+				+ DeadStoneMax * 150
+				+ NinjaRangeMax * 80
+				+ DogCountMax * 70;
+			score = int(BaseScore*score / m);
+
+			break;
+		case '4'://“G—‹Œ‚
+			score += getScore_Ninryoku(status) * 40;
+			score -= getScore_SoulRange(status) * 200;
+			score += getScore_DogRange(status) * 50;
+			score -= getScore_DeadStone(status) * 100;
+			score += getScore_NinjaRange(status) * 80;
+			score -= getScore_DogCount(status) * 70;
+
+			m = NinryokuMax * 40
+				+ SoulRangeMax * 200
+				+ DogRangeMax * 50
+				+ DeadStoneMax * 100
+				+ NinjaRangeMax * 80
+				+ DogCountMax * 70;
+			score = int(BaseScore*score / m);
+
+			break;
+		case '5'://Ž©•ªg
+			score += getScore_Ninryoku(status) * 80;
+			score -= getScore_SoulRange(status) * 200;
+			score += getScore_DogRange(status) * 20;
+			score -= getScore_DeadStone(status) * 100;
+			score += getScore_NinjaRange(status) * 80;
+			score -= getScore_DogCount(status) * 70;
+
+			m = NinryokuMax * 80
+				+ SoulRangeMax * 200
+				+ DogRangeMax * 20
+				+ DeadStoneMax * 100
+				+ NinjaRangeMax * 80
+				+ DogCountMax * 70;
+			score = int(BaseScore*score / m);
+
+			break;
+		case '6'://“G•ªg
+			score += getScore_Ninryoku(status) * 40;
+			score -= getScore_SoulRange(status) * 200;
+			score += getScore_DogRange(status) * 50;
+			score -= getScore_DeadStone(status) * 100;
+			score += getScore_NinjaRange(status) * 80;
+			score -= getScore_DogCount(status) * 70;
+
+			m = NinryokuMax * 40
+				+ SoulRangeMax * 200
+				+ DogRangeMax * 50
+				+ DeadStoneMax * 100
+				+ NinjaRangeMax * 80
+				+ DogCountMax * 70;
+			score = int(BaseScore*score / m);
+
+			break;
+		case '7'://‰ñ“]Ža
+			score += getScore_Ninryoku(status) * 40;
+			score -= getScore_SoulRange(status) * 200;
+			score += getScore_DogRange(status) * 20;
+			score -= getScore_DeadStone(status) * 100;
+			score += getScore_NinjaRange(status) * 80;
+			score -= getScore_DogCount(status) * 800;
+
+			m = NinryokuMax * 40
+				+ SoulRangeMax * 200
+				+ DogRangeMax * 20
+				+ DeadStoneMax * 100
+				+ NinjaRangeMax * 80
+				+ DogCountMax * 800;
+			score = int(BaseScore*score / m);
+
+			break;
+		}
+	}
 
 	return score;
 }
@@ -424,6 +658,266 @@ int AI03::getScore_DogCount(const Status & status) {
 	const auto dogs = status.getDogs();
 
 	return int(dogs.size());
+}
+
+
+void AI03::defenceThink(const Status & status) {
+
+	const int ninryoku = status.getNinryoku();
+	const NinjutsuArray cost = status.getNinjutsuCost();
+
+	for (const auto& ninjutsu : defenceNinjutsuSort)
+	{
+		if (ninryoku >= cost[int(ninjutsu.second)])
+		{
+			switch (ninjutsu.second)
+			{
+			case NinjutsuCommand::Speed:
+				cerr << "’´‚‘¬‚ðŽŽ‚Ý‚½" << endl;
+
+				if (defenceSpeed(status)) return;
+
+				break;
+			case NinjutsuCommand::Rockfall_M:
+				cerr << "Ž©—ŽÎ‚ðŽŽ‚Ý‚½" << endl;
+				break;
+			case NinjutsuCommand::Stroke_M:
+				cerr << "Ž©—‹Œ‚‚ðŽŽ‚Ý‚½" << endl;
+				break;
+			case NinjutsuCommand::Avatar_M:
+				cerr << "Ž©•ªg‚ðŽŽ‚Ý‚½" << endl;
+				break;
+			case NinjutsuCommand::RotatinCut:
+				cerr << "‰ñ“]Ža‚ðŽŽ‚Ý‚½" << endl;
+
+				if (defenceRotatinCut(status)) return;
+
+				break;
+			}
+		}
+	}
+
+}
+
+bool AI03::defenceSpeed(const Status & status) {
+
+	size_t beamIndex = 0;
+	size_t nextbeamIndex = 0;
+
+	{
+		Data data;
+		data.status = status;
+		beam[beamIndex++] = data;
+	}
+
+	auto movePatton2 = [&](int nest, size_t i, const Data& d) {
+		for (const auto& com1 : Command2)
+		{
+			for (const auto& com2 : Command2)
+			{
+				Data data = d;
+				Status sta = move(data.status, com1, com2);
+				const array<string, 2> command = { com1,com2 };
+
+				const int score = getScore(sta, nest, data.ninjutsuStr);
+
+				data.status = sta;
+				data.commands[nest] = command;
+				if (score == INT16_MIN)
+					data.score = INT16_MIN;
+				else
+					data.score += score;
+
+				for (size_t j = 0; j < BeamWidth; j++)
+				{
+					if (j >= nextbeamIndex)
+					{
+						nextbeam[nextbeamIndex++] = data;
+						break;
+					}
+					else if (nextbeam[j] < data)
+					{
+						for (size_t k = min(nextbeamIndex, BeamWidth - 1); k > j; k--)
+						{
+							nextbeam[k] = nextbeam[k - 1];
+						}
+						nextbeamIndex++;
+						nextbeam[j] = data;
+						break;
+					}
+				}
+			}
+		}
+	};
+	auto movePatton3 = [&](int nest, size_t i, const Data& d) {
+		for (const auto& com1 : Command3)
+		{
+			for (const auto& com2 : Command3)
+			{
+				Data data = d;
+				Status sta = move(data.status, com1, com2);
+				const array<string, 2> command = { com1,com2 };
+
+				data.ninjutsuStr = "0";
+				const int score = getScore(sta, nest, data.ninjutsuStr);
+
+				data.status = sta;
+				data.commands[nest] = command;
+
+				if (score == INT16_MIN)
+					data.score = INT16_MIN;
+				else
+					data.score += score;
+
+				for (size_t j = 0; j < BeamWidth; j++)
+				{
+					if (j >= nextbeamIndex)
+					{
+						nextbeam[nextbeamIndex++] = data;
+						break;
+					}
+					else if (nextbeam[j] < data)
+					{
+						for (size_t k = min(nextbeamIndex, BeamWidth - 1); k > j; k--)
+						{
+							nextbeam[k] = nextbeam[k - 1];
+						}
+						nextbeamIndex++;
+						nextbeam[j] = data;
+						break;
+					}
+				}
+			}
+		}
+	};
+
+	For(nest, SearchNest)
+	{
+		for (size_t i = 0; i < beamIndex; i++)
+		{
+			if (nest == 0)
+			{
+				movePatton3(nest, i, beam[i]);
+			}
+			else
+			{
+				movePatton2(nest, i, beam[i]);
+			}
+		}
+
+		beam = nextbeam;
+		beamIndex = min(nextbeamIndex, BeamWidth);
+
+	}
+
+	if (beam[0].score <= INT16_MIN)
+		return false;
+
+	outputCommand[0] = beam[0].commands[0][0];
+	outputCommand[1] = beam[0].commands[0][1];
+
+	if (beam[0].ninjutsuStr != "")
+	{
+		ninjutsuFlag = true;
+		ninjutsuString = beam[0].ninjutsuStr;
+	}
+
+	cerr << "score:" << beam[0].score << endl;
+	return true;
+}
+bool AI03::defenceRotatinCut(const Status & status) {
+
+	size_t beamIndex = 0;
+	size_t nextbeamIndex = 0;
+
+	const auto ninryoku = status.getNinryoku();
+
+	{
+		Data data;
+		data.status = status;
+		beam[beamIndex++] = data;
+	}
+
+	auto movePatton = [&](int nest, size_t i, const Data& d) {
+		for (const auto& com1 : Command2)
+		{
+			for (const auto& com2 : Command2)
+			{
+				Data data = d;
+				Status sta = move(data.status, com1, com2);
+				const array<string, 2> command = { com1,com2 };
+
+				const int score = getScore(sta, nest, data.ninjutsuStr);
+
+				data.status = sta;
+				data.commands[nest] = command;
+				if (score == INT16_MIN)
+					data.score = INT16_MIN;
+				else
+					data.score += score;
+
+				for (size_t j = 0; j < BeamWidth; j++)
+				{
+					if (j >= nextbeamIndex)
+					{
+						nextbeam[nextbeamIndex++] = data;
+						break;
+					}
+					else if (nextbeam[j] < data)
+					{
+						for (size_t k = min(nextbeamIndex, BeamWidth - 1); k > j; k--)
+						{
+							nextbeam[k] = nextbeam[k - 1];
+						}
+						nextbeamIndex++;
+						nextbeam[j] = data;
+						break;
+					}
+				}
+			}
+		}
+	};
+
+	For(nest, SearchNest)
+	{
+		for (size_t i = 0; i < beamIndex; i++)
+		{
+			for (int id = 0; id < 2; id++)
+			{
+				Data data = beam[i];
+				const auto ninjas = data.status.getNinjas();
+
+				data.status.setNinryoku(ninryoku - Status::getNinjutsuCost(NinjutsuCommand::RotatinCut));
+				data.status.eraseDogs(ninjas[id].point);
+				data.ninjutsuStr = "7 " + to_string(id);
+
+				movePatton(nest, i, data);
+
+				if (nest != 0)
+					movePatton(nest, i, beam[i]);
+			}
+		}
+
+		beam = nextbeam;
+		beamIndex = min(nextbeamIndex, BeamWidth);
+
+	}
+
+	if (beam[0].score <= INT16_MIN)
+		return false;
+
+	outputCommand[0] = beam[0].commands[0][0];
+	outputCommand[1] = beam[0].commands[0][1];
+
+	if (beam[0].ninjutsuStr != "")
+	{
+		ninjutsuFlag = true;
+		ninjutsuString = beam[0].ninjutsuStr;
+	}
+
+	cerr << "score:" << beam[0].score << endl;
+
+	return true;
 }
 
 void AI03::attackThink(const Status & my, const Status & enemy) {

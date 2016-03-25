@@ -3,6 +3,9 @@
 #include "BaseAI.hpp"
 #include "DogSimulation.hpp"
 
+const size_t BeamWidth = 300;
+const size_t SearchNest = 3;
+
 class AI03 : public BaseAI {
 public:
 
@@ -37,6 +40,11 @@ public:
 private:
 
 	void moveThink(const Status& my);
+
+	void defenceThink(const Status& status);
+	bool defenceSpeed(const Status& status);
+	bool defenceRotatinCut(const Status& status);
+
 	void attackThink(const Status& my, const Status& enemy);
 
 	//プレイヤーとステージのシミュレーション
@@ -44,7 +52,7 @@ private:
 
 	bool checkHit(const Status& status, int nest);
 
-	int getScore(const Status& status, int nest);
+	int getScore(const Status& status, int nest,const string& ninjutsuStr);
 	int getScore_Ninryoku(const Status& status);
 	int getScore_SoulRange(const Status& status);
 	int getScore_DogRange(const Status& status);
@@ -60,4 +68,5 @@ private:
 	void setCost(const NinjutsuArray& cost);
 	array<pair<int, NinjutsuCommand>, 5> defenceNinjutsuSort;
 	array<pair<int, NinjutsuCommand>, 4> attackNinjutsuSort;
+
 };
