@@ -49,7 +49,7 @@ public:
 		for (int i = 0; i < dogNum; i++)
 		{
 			cin >> character.id >> character.point.y >> character.point.x;
-			dogs[i] = character;
+			dogs[character.id] = character;
 		}
 
 		soulPoints.clear();

@@ -43,12 +43,14 @@ private:
 
 	void defenceThink(const Status& status);
 	bool defenceSpeed(const Status& status);
+	bool defenceAvatar(const Status& status);
 	bool defenceRotatinCut(const Status& status);
 
 	void attackThink(const Status& my, const Status& enemy);
 
 	//プレイヤーとステージのシミュレーション
 	Status move(const Status& status, const string& com1, const string& com2);
+	double movePercent(const Status& status, const string& com1, const string& com2);
 
 	bool checkHit(const Status& status, int nest);
 
@@ -59,6 +61,7 @@ private:
 	int getScore_NinjaRange(const Status& status);
 	int getScore_DeadStone(const Status& status);
 	int getScore_DogCount(const Status& status);
+	int getScore_WallCount(const Status& status);
 
 	const short point2hash(const Point& p) const;
 	const Point hash2point(const short& h) const;
