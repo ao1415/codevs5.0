@@ -2,6 +2,7 @@
 
 #include "BaseAI.hpp"
 #include "DogSimulation.hpp"
+#include "DogEscape.hpp"
 
 const size_t BeamWidth = 300;
 const size_t SearchNest = 3;
@@ -49,6 +50,9 @@ private:
 	bool defenceRotatinCut(const Status& status);
 
 	void attackThink(const Status& my, const Status& enemy);
+	bool attackRockfall(const Status& status);
+	bool attackStroke(const Status& status);
+	bool attackAvatar(const Status& status);
 
 	//プレイヤーとステージのシミュレーション
 	Status move(const Status& status, const string& com1, const string& com2);

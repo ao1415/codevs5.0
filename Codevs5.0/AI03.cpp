@@ -22,6 +22,13 @@ void AI03::think(const Status& my, const Status& enemy) {
 	try
 	{
 		moveThink(my);
+
+		if (!ninjutsuFlag)
+		{
+			cerr << "UŒ‚‚µ‚Ä‚Ý‚é" << endl;
+			attackThink(my, enemy);
+		}
+
 	}
 	catch (logic_error e)
 	{
@@ -346,7 +353,7 @@ double AI03::movePercent(const Status & status, const string & com1, const strin
 	auto function = [](const Point& p, const Point& add, StageArray& stageStateArr, double& percent) {
 		const Point p1 = p + add;
 		const Point p2 = p1 + add;
-
+		const double m = 1.2;
 		switch (stageStateArr[p1.x][p1.y])
 		{
 		case Stage::State::None:
@@ -356,7 +363,7 @@ double AI03::movePercent(const Status & status, const string & com1, const strin
 			case Stage::State::Rock:
 			case Stage::State::Dog:
 			case Stage::State::Player:
-				percent /= 2;
+				percent /= m;
 			}
 			return p1; break;
 		case Stage::State::Dog:
@@ -369,7 +376,7 @@ double AI03::movePercent(const Status & status, const string & com1, const strin
 			switch (stageStateArr[p2.x][p2.y])
 			{
 			case Stage::State::None:
-				percent /= 2;
+				percent /= m;
 			case Stage::State::Soul:
 				stageStateArr[p1.x][p1.y] = Stage::State::None;
 				stageStateArr[p2.x][p2.y] = Stage::State::Rock;
@@ -1076,7 +1083,7 @@ bool AI03::defenceAvatar(const Status & status) {
 		beam[beamIndex++] = data;
 	}
 
-	auto movePatton = [&](int nest, size_t i, const Data& d, const Point& avatarPoint) {
+	auto movePattonA = [&](int nest, size_t i, const Data& d, const Point& avatarPoint) {
 		for (const auto& com1 : Command2)
 		{
 			for (const auto& com2 : Command2)
@@ -1091,8 +1098,8 @@ bool AI03::defenceAvatar(const Status & status) {
 				const auto nextDogs = DogSimulation::simulation(avatarPoint, avatarPoint, sta.getStage(), dogs);
 				sta.setDogs(nextDogs);
 
-				//const int score = int(getScore(sta, -1, data.ninjutsuStr)*percent);
-				const int score = getScore(sta, -1, data.ninjutsuStr);
+				const int score = int(getScore(sta, -1, data.ninjutsuStr)*percent);
+				//const int score = getScore(sta, -1, data.ninjutsuStr);
 
 				data.status = sta;
 				data.commands[nest] = command;
@@ -1124,8 +1131,51 @@ bool AI03::defenceAvatar(const Status & status) {
 			}
 		}
 	};
+	auto movePatton = [&](int nest, size_t i, const Data& d) {
+		for (const auto& com1 : Command2)
+		{
+			for (const auto& com2 : Command2)
+			{
+				Data data = d;
+				Status status = move(data.status, com1, com2);
+				double percent = movePercent(data.status, com1, com2);
 
-	For(nest, 1)
+				const array<string, 2> command = { com1,com2 };
+
+				const int score = int(getScore(status, nest, data.ninjutsuStr)*percent);
+
+				data.status = status;
+				data.commands[nest] = command;
+				if (score == INT16_MIN)
+					data.score = INT16_MIN * 2;
+				else
+				{
+					if (data.score > INT16_MIN)
+						data.score += score;
+				}
+				for (size_t j = 0; j < BeamWidth; j++)
+				{
+					if (j >= nextbeamIndex)
+					{
+						nextbeam[nextbeamIndex++] = data;
+						break;
+					}
+					else if (nextbeam[j] < data)
+					{
+						for (size_t k = min(nextbeamIndex, BeamWidth - 1); k > j; k--)
+						{
+							nextbeam[k] = nextbeam[k - 1];
+						}
+						nextbeamIndex++;
+						nextbeam[j] = data;
+						break;
+					}
+				}
+			}
+		}
+	};
+
+	For(nest, SearchNest)
 	{
 		for (size_t i = 0; i < beamIndex; i++)
 		{
@@ -1134,21 +1184,27 @@ bool AI03::defenceAvatar(const Status & status) {
 
 			data.status.setNinryoku(ninryoku - Status::getNinjutsuCost(NinjutsuCommand::Avatar_M));
 
-			data.ninjutsuStr = "5 " + pointToString2(ninjas[i].point);
-			movePatton(nest, i, data, ninjas[i].point);
+			if (nest == 0)
+			{
+				data.ninjutsuStr = "5 " + pointToString2(ninjas[i].point);
+				movePattonA(nest, i, data, ninjas[i].point);
 
-			data.ninjutsuStr = "5 " + pointToString2(Point(1, 1));
-			movePatton(nest, i, data, Point(1, 1));
+				data.ninjutsuStr = "5 " + pointToString2(Point(1, 1));
+				movePattonA(nest, i, data, Point(1, 1));
 
-			data.ninjutsuStr = "5 " + pointToString2(Point(1, StageY - 2));
-			movePatton(nest, i, data, Point(1, StageY - 2));
+				data.ninjutsuStr = "5 " + pointToString2(Point(1, StageY - 2));
+				movePattonA(nest, i, data, Point(1, StageY - 2));
 
-			data.ninjutsuStr = "5 " + pointToString2(Point(StageX - 2, 1));
-			movePatton(nest, i, data, Point(StageX - 2, 1));
+				data.ninjutsuStr = "5 " + pointToString2(Point(StageX - 2, 1));
+				movePattonA(nest, i, data, Point(StageX - 2, 1));
 
-			data.ninjutsuStr = "5 " + pointToString2(Point(StageX - 2, StageY - 2));
-			movePatton(nest, i, data, Point(StageX - 2, StageY - 2));
-
+				data.ninjutsuStr = "5 " + pointToString2(Point(StageX - 2, StageY - 2));
+				movePattonA(nest, i, data, Point(StageX - 2, StageY - 2));
+			}
+			else
+			{
+				movePatton(nest, i, data);
+			}
 		}
 
 		beam = nextbeam;
@@ -1227,7 +1283,7 @@ bool AI03::defenceRotatinCut(const Status & status) {
 		}
 	};
 
-	For(nest, SearchNest)
+	For(nest, 2)
 	{
 		for (size_t i = 0; i < beamIndex; i++)
 		{
@@ -1271,6 +1327,120 @@ bool AI03::defenceRotatinCut(const Status & status) {
 
 void AI03::attackThink(const Status & my, const Status & enemy) {
 
+	const int ninryoku = my.getNinryoku() - defenceNinjutsuSort[4].first;
+	const NinjutsuArray cost = my.getNinjutsuCost();
+
+	for (const auto& ninjutsu : attackNinjutsuSort)
+	{
+		if (ninryoku >= cost[int(ninjutsu.second)])
+		{
+			switch (ninjutsu.second)
+			{
+			case NinjutsuCommand::Rockfall_E:
+				//cerr << "“G—ŽÎ‚ðŽŽ‚Ý‚½" << endl;
+
+				if (attackRockfall(enemy)) return;
+
+				break;
+			case NinjutsuCommand::Stroke_E:
+				//cerr << "“G—‹Œ‚‚ðŽŽ‚Ý‚½" << endl;
+
+				//if (attackStroke(enemy)) return;
+
+				break;
+			case NinjutsuCommand::Avatar_E:
+				//cerr << "“G•ªg‚ðŽŽ‚Ý‚½" << endl;
+
+				if (attackAvatar(enemy)) return;
+
+				break;
+			case NinjutsuCommand::RotatinCut:
+				//cerr << "‰ñ“]Ža‚ðŽŽ‚Ý‚½" << endl;
+
+				//if (defenceRotatinCut(status)) return;
+
+				break;
+			}
+		}
+	}
+}
+
+bool AI03::attackRockfall(const Status & status) {
+
+	const auto ninjas = status.getNinjas();
+	const Stage stage(status.getStageDogStatus());
+
+	for (const auto ninja : ninjas)
+	{
+		int count = 0;
+
+		for (const auto dir : directionPoint)
+		{
+			const Point p1 = ninja.point + dir;
+			const Point p2 = ninja.point + dir + dir;
+			if (stage.getState(p1) == Stage::State::Rock)
+			{
+				if (stage.getState(p2) != Stage::State::None)
+				{
+					count++;
+				}
+			}
+			else if (stage.getState(p1) == Stage::State::Wall)
+			{
+				count++;
+			}
+		}
+		if (count < 2) continue;
+
+		for (const auto dir : directionPoint)
+		{
+			const Point p1 = ninja.point + dir;
+			const Point p2 = ninja.point + dir + dir;
+			if (stage.getState(p1) == Stage::State::None)
+			{
+				if (stage.getState(p2) != Stage::State::None)
+				{
+					ninjutsuFlag = true;
+					ninjutsuString = "2 " + pointToString2(p1);
+					return true;
+				}
+			}
+			else if (stage.getState(p1) == Stage::State::Rock)
+			{
+				if (stage.getState(p2) == Stage::State::None)
+				{
+					ninjutsuFlag = true;
+					ninjutsuString = "2 " + pointToString2(p2);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+bool AI03::attackStroke(const Status & status) {
+	return false;
+}
+bool AI03::attackAvatar(const Status & status) {
+
+	const auto ninjas = status.getNinjas();
+	const Stage stage(status.getStageDogStatus());
+
+	for (int i = 0; i < 2; i++)
+	{
+		try
+		{
+			DogEscape().getCommand2(i, status);
+		}
+		catch (logic_error)
+		{
+			ninjutsuFlag = true;
+			ninjutsuString = "6 " + pointToString2(ninjas[i].point);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 const short AI03::point2hash(const Point& p) const {
