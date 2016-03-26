@@ -33,7 +33,7 @@ public:
 		cin >> stageY >> stageX;
 
 		stage.input();
-
+		dogStateStage = stage.getStage();
 		Character character;
 
 		int ninjaNum;
@@ -50,6 +50,7 @@ public:
 		{
 			cin >> character.id >> character.point.y >> character.point.x;
 			dogs[character.id] = character;
+			dogStateStage[character.point.x][character.point.y] = Stage::State::Dog;
 		}
 
 		soulPoints.clear();
@@ -82,14 +83,7 @@ public:
 	const map<int, Character>& getDogs() const { return dogs; }
 	const vector<Point>& getSoulPoints() const { return soulPoints; }
 
-	const StageArray getStageDogStatus() const {
-		StageArray s = stage.getStage();
-
-		for (const auto& dog : dogs)
-			s[dog.second.point.x][dog.second.point.y] = Stage::State::Dog;
-
-		return s;
-	}
+	const StageArray& getStageDogStatus() const { return dogStateStage; }
 
 	void eraseDogs(const Point& p) {
 		for (auto it = dogs.begin(); it != dogs.end();)
@@ -114,6 +108,7 @@ private:
 	static NinjutsuArray ninjutsuCost;
 	//ステージ
 	Stage stage;
+	StageArray dogStateStage;
 	//忍術の使用回数
 	NinjutsuArray ninjutsuNumber;
 

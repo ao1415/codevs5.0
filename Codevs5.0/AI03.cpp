@@ -44,18 +44,28 @@ void AI03::think(const Status& my, const Status& enemy) {
 //忍者の座標・周囲の犬の状態(マンハッタン1)・周囲ニンジャソウル(マンハッタン2)の状態からハッシュ値を作成する
 bitset<64> AI03::status2hash(const Status& status) {
 
-	const auto ninjas = status.getNinjas();
-	const auto dogs = status.getDogs();
-	const auto stage = status.getStageDogStatus();
+	const auto& ninjas = status.getNinjas();
+	const auto& dogs = status.getDogs();
+	const auto& stage = status.getStageDogStatus();
 
 	//unsigned int ninjaHash = point2hash(ninjas[0].point) << 16 + point2hash(ninjas[1].point);
 
 	//32
-	bitset<32> ninjaHash((point2hash(ninjas[0].point) << 16) + point2hash(ninjas[1].point));
+	//bitset<32> ninjaHash((point2hash(ninjas[0].point) << 16) + point2hash(ninjas[1].point));
+	array<bool, 32> ninjaHash;
+	ninjaHash.fill(false);
+	unsigned int nh2 = (point2hash(ninjas[0].point) << 16) + point2hash(ninjas[1].point);
+	int p = 1;
+	for (int c = 0; c < 32; c++)
+	{
+		if ((nh2&p) > 0)
+			ninjaHash[c] = true;
+		p *= 2;
+	}
 
 	//8
-	bitset<8> dogHash;
-	dogHash.reset();
+	array<bool, 8> dogHash;
+	dogHash.fill(false);
 	int index = 0;
 	for (const auto& ninja : ninjas)
 	{
@@ -64,14 +74,13 @@ bitset<64> AI03::status2hash(const Status& status) {
 			const Point p = ninja.point + dire;
 			if (stage[p.x][p.y] == Stage::State::Dog)
 				dogHash[index] = true;
-			else
-				dogHash[index] = false;
 			index++;
 		}
 	}
 
 	//8
-	bitset<24> soulHash;
+	array<bool, 24> soulHash;
+	soulHash.fill(false);
 	set<short> soulPointsHash;
 	for (const auto& sp : status.getSoulPoints())
 	{
@@ -90,8 +99,6 @@ bitset<64> AI03::status2hash(const Status& status) {
 				{
 					if (soulPointsHash.find(point2hash(p)) != soulPointsHash.end())
 						soulHash[index] = true;
-					else
-						soulHash[index] = false;
 					index++;
 				}
 			}
@@ -153,18 +160,19 @@ void AI03::moveThink(const Status& my) {
 				const array<string, 2> command = { com1,com2 };
 
 				int score = getScore(status, nest, data.ninjutsuStr);
-
 				socrePlus(status, score, percent);
 
 				data.status = status;
 				data.commands[nest] = command;
-				if (score == INT16_MIN)
+
+				if (score <= INT16_MIN)
 					data.score = INT16_MIN * 2;
 				else
 				{
 					if (data.score > INT16_MIN)
 						data.score += score*percent;
 				}
+
 				for (size_t j = 0; j < BeamWidth; j++)
 				{
 					if (j >= nextbeamIndex)
@@ -419,7 +427,7 @@ Status AI03::move(const Status& status, const string& com1, const string& com2) 
 }
 
 double AI03::movePercent(const Status & status, const string & com1, const string & com2) {
-	return 1.0;
+	//return 1.0;
 	const auto ninjas = status.getNinjas();
 
 	auto stageStateArr = status.getStageDogStatus();
@@ -430,7 +438,7 @@ double AI03::movePercent(const Status & status, const string & com1, const strin
 	auto function = [](const Point& p, const Point& add, StageArray& stageStateArr, double& percent) {
 		const Point p1 = p + add;
 		const Point p2 = p1 + add;
-		const double m = 1.2;
+		const double m = 1.1;
 		switch (stageStateArr[p1.x][p1.y])
 		{
 		case Stage::State::None:

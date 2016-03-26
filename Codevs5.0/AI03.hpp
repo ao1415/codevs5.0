@@ -4,7 +4,7 @@
 #include "DogSimulation.hpp"
 #include "DogEscape.hpp"
 
-const size_t BeamWidth = 300;
+const size_t BeamWidth = 200;
 const size_t SearchNest = 3;
 
 class AI03 : public BaseAI {
@@ -76,14 +76,15 @@ private:
 
 	void socrePlus(const Status& status, int& score, const double percent) {
 
-		const auto hash = status2hash(status);
-		if (statusHash0 == hash || statusHash1 == hash)
-		{
-			score += INT16_MIN / 2;
-		}
 		if (score > INT16_MIN)
+		{
+			const auto hash = status2hash(status);
+			if (statusHash0 == hash || statusHash1 == hash)
+			{
+				score = INT16_MIN * 2;
+			}
 			score += 200 * percent;
-
+		}
 	}
 
 	const short point2hash(const Point& p) const;
