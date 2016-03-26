@@ -11,6 +11,7 @@
 #include <stack>
 #include <map>
 #include <set>
+#include <bitset>
 
 #include <memory>
 #include <algorithm>

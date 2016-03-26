@@ -17,6 +17,9 @@ array<Data, BeamWidth> nextbeam;
 
 void AI03::think(const Status& my, const Status& enemy) {
 
+	statusHash1 = statusHash0;
+	statusHash0 = status2hash(my);
+
 	setCost(Status::getNinjutsuCost());
 
 	try
@@ -35,6 +38,76 @@ void AI03::think(const Status& my, const Status& enemy) {
 		cerr << "忍術を使う" << endl;
 		defenceThink(my);
 	}
+
+}
+
+//忍者の座標・周囲の犬の状態(マンハッタン1)・周囲ニンジャソウル(マンハッタン2)の状態からハッシュ値を作成する
+bitset<64> AI03::status2hash(const Status& status) {
+
+	const auto ninjas = status.getNinjas();
+	const auto dogs = status.getDogs();
+	const auto stage = status.getStageDogStatus();
+
+	//unsigned int ninjaHash = point2hash(ninjas[0].point) << 16 + point2hash(ninjas[1].point);
+
+	//32
+	bitset<32> ninjaHash((point2hash(ninjas[0].point) << 16) + point2hash(ninjas[1].point));
+
+	//8
+	bitset<8> dogHash;
+	dogHash.reset();
+	int index = 0;
+	for (const auto& ninja : ninjas)
+	{
+		for (const auto& dire : directionPoint)
+		{
+			const Point p = ninja.point + dire;
+			if (stage[p.x][p.y] == Stage::State::Dog)
+				dogHash[index] = true;
+			else
+				dogHash[index] = false;
+			index++;
+		}
+	}
+
+	//8
+	bitset<24> soulHash;
+	set<short> soulPointsHash;
+	for (const auto& sp : status.getSoulPoints())
+	{
+		soulPointsHash.insert(point2hash(sp));
+	}
+	index = 0;
+	for (const auto& ninja : ninjas)
+	{
+		for (int dy = -2; dy < 3; dy++)
+		{
+			for (int dx = -2; dx < 3; dx++)
+			{
+				if (dy == 0 && dx == 0) continue;
+				const Point p = ninja.point + Point(dx, dy);
+				if (manhattan(ninja.point, p) <= 2)
+				{
+					if (soulPointsHash.find(point2hash(p)) != soulPointsHash.end())
+						soulHash[index] = true;
+					else
+						soulHash[index] = false;
+					index++;
+				}
+			}
+		}
+	}
+
+	bitset<64> hash;
+	index = 0;
+	for (size_t i = 0; i < ninjaHash.size(); i++)
+		hash[index++] = ninjaHash[i];
+	for (size_t i = 0; i < dogHash.size(); i++)
+		hash[index++] = dogHash[i];
+	for (size_t i = 0; i < soulHash.size(); i++)
+		hash[index++] = soulHash[i];
+
+	return hash;
 }
 
 void AI03::setCost(const NinjutsuArray& cost) {
@@ -79,7 +152,9 @@ void AI03::moveThink(const Status& my) {
 
 				const array<string, 2> command = { com1,com2 };
 
-				const int score = int(getScore(status, nest, data.ninjutsuStr)*percent);
+				int score = getScore(status, nest, data.ninjutsuStr);
+
+				socrePlus(status, score, percent);
 
 				data.status = status;
 				data.commands[nest] = command;
@@ -88,7 +163,7 @@ void AI03::moveThink(const Status& my) {
 				else
 				{
 					if (data.score > INT16_MIN)
-						data.score += score;
+						data.score += score*percent;
 				}
 				for (size_t j = 0; j < BeamWidth; j++)
 				{
@@ -127,7 +202,9 @@ void AI03::moveThink(const Status& my) {
 				data.status.setNinryoku(ninryoku - Status::getNinjutsuCost(NinjutsuCommand::Speed));
 
 				data.ninjutsuStr = "0";
-				const int score = int(getScore(status, nest, data.ninjutsuStr)*percent);
+				int score = getScore(status, nest, data.ninjutsuStr);
+
+				socrePlus(status, score, percent);
 
 				data.status = status;
 				data.commands[nest] = command;
@@ -135,7 +212,7 @@ void AI03::moveThink(const Status& my) {
 				if (score == INT16_MIN)
 					data.score = INT16_MIN;
 				else
-					data.score += score;
+					data.score += score*percent;
 
 				for (size_t j = 0; j < BeamWidth; j++)
 				{
@@ -800,15 +877,15 @@ void AI03::defenceThink(const Status & status) {
 
 				break;
 			case NinjutsuCommand::Rockfall_M:
-				cerr << "自落石を試みた" << endl;
+				//cerr << "自落石を試みた" << endl;
 				//未実装(使えない)
-				if (defenceRockfall(status)) return;
+				//if (defenceRockfall(status)) return;
 
 				break;
 			case NinjutsuCommand::Stroke_M:
-				cerr << "自雷撃を試みた" << endl;
+				//cerr << "自雷撃を試みた" << endl;
 
-				if (defenceStroke(status)) return;
+				//if (defenceStroke(status)) return;
 
 				break;
 			case NinjutsuCommand::Avatar_M:
@@ -851,14 +928,16 @@ bool AI03::defenceSpeed(const Status & status) {
 
 				const array<string, 2> command = { com1,com2 };
 
-				const int score = int(getScore(sta, nest, data.ninjutsuStr)*percent);
+				int score = getScore(sta, nest, data.ninjutsuStr);
+
+				socrePlus(sta, score, percent);
 
 				data.status = sta;
 				data.commands[nest] = command;
 				if (score == INT16_MIN)
 					data.score = INT16_MIN;
 				else
-					data.score += score;
+					data.score += score*percent;
 
 				for (size_t j = 0; j < BeamWidth; j++)
 				{
@@ -893,7 +972,9 @@ bool AI03::defenceSpeed(const Status & status) {
 				const array<string, 2> command = { com1,com2 };
 
 				data.ninjutsuStr = "0";
-				const int score = int(getScore(sta, nest, data.ninjutsuStr)*percent);
+				int score = getScore(sta, nest, data.ninjutsuStr);
+
+				socrePlus(sta, score, percent);
 
 				data.status = sta;
 				data.commands[nest] = command;
@@ -901,7 +982,7 @@ bool AI03::defenceSpeed(const Status & status) {
 				if (score == INT16_MIN)
 					data.score = INT16_MIN;
 				else
-					data.score += score;
+					data.score += score*percent;
 
 				for (size_t j = 0; j < BeamWidth; j++)
 				{
@@ -987,14 +1068,16 @@ bool AI03::defenceStroke(const Status & status) {
 
 				const array<string, 2> command = { com1,com2 };
 
-				const int score = int(getScore(sta, nest, data.ninjutsuStr)*percent);
+				int score = getScore(sta, nest, data.ninjutsuStr);
+
+				socrePlus(sta, score, percent);
 
 				data.status = sta;
 				data.commands[nest] = command;
 				if (score == INT16_MIN)
 					data.score = INT16_MIN;
 				else
-					data.score += score;
+					data.score += score*percent;
 
 				for (size_t j = 0; j < BeamWidth; j++)
 				{
@@ -1098,8 +1181,10 @@ bool AI03::defenceAvatar(const Status & status) {
 				const auto nextDogs = DogSimulation::simulation(avatarPoint, avatarPoint, sta.getStage(), dogs);
 				sta.setDogs(nextDogs);
 
-				const int score = int(getScore(sta, -1, data.ninjutsuStr)*percent);
+				int score = getScore(sta, -1, data.ninjutsuStr);
 				//const int score = getScore(sta, -1, data.ninjutsuStr);
+
+				socrePlus(sta, score, percent);
 
 				data.status = sta;
 				data.commands[nest] = command;
@@ -1108,7 +1193,7 @@ bool AI03::defenceAvatar(const Status & status) {
 				else
 				{
 					if (data.score > INT16_MIN)
-						data.score += score;
+						data.score += score*percent;
 				}
 				for (size_t j = 0; j < BeamWidth; j++)
 				{
@@ -1142,7 +1227,9 @@ bool AI03::defenceAvatar(const Status & status) {
 
 				const array<string, 2> command = { com1,com2 };
 
-				const int score = int(getScore(status, nest, data.ninjutsuStr)*percent);
+				int score = getScore(status, nest, data.ninjutsuStr);
+
+				socrePlus(status, score, percent);
 
 				data.status = status;
 				data.commands[nest] = command;
@@ -1151,7 +1238,7 @@ bool AI03::defenceAvatar(const Status & status) {
 				else
 				{
 					if (data.score > INT16_MIN)
-						data.score += score;
+						data.score += score*percent;
 				}
 				for (size_t j = 0; j < BeamWidth; j++)
 				{
@@ -1252,14 +1339,16 @@ bool AI03::defenceRotatinCut(const Status & status) {
 
 				const array<string, 2> command = { com1,com2 };
 
-				const int score = int(getScore(sta, nest, data.ninjutsuStr)*percent);
+				int score = getScore(sta, nest, data.ninjutsuStr);
+
+				socrePlus(sta, score, percent);
 
 				data.status = sta;
 				data.commands[nest] = command;
 				if (score == INT16_MIN)
 					data.score = INT16_MIN;
 				else
-					data.score += score;
+					data.score += score*percent;
 
 				for (size_t j = 0; j < BeamWidth; j++)
 				{

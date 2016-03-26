@@ -40,6 +40,11 @@ public:
 	}
 private:
 
+	bitset<64> statusHash0;//0ターン前
+	bitset<64> statusHash1;//1ターン前
+
+	bitset<64> status2hash(const Status& status);
+
 	void moveThink(const Status& my);
 
 	void defenceThink(const Status& status);
@@ -60,7 +65,7 @@ private:
 
 	bool checkHit(const Status& status, int nest);
 
-	int getScore(const Status& status, int nest,const string& ninjutsuStr);
+	int getScore(const Status& status, int nest, const string& ninjutsuStr);
 	int getScore_Ninryoku(const Status& status);
 	int getScore_SoulRange(const Status& status);
 	int getScore_DogRange(const Status& status);
@@ -68,6 +73,18 @@ private:
 	int getScore_DeadStone(const Status& status);
 	int getScore_DogCount(const Status& status);
 	int getScore_WallCount(const Status& status);
+
+	void socrePlus(const Status& status, int& score, const double percent) {
+
+		const auto hash = status2hash(status);
+		if (statusHash0 == hash || statusHash1 == hash)
+		{
+			score += INT16_MIN / 2;
+		}
+		if (score > INT16_MIN)
+			score += 200 * percent;
+
+	}
 
 	const short point2hash(const Point& p) const;
 	const Point hash2point(const short& h) const;
