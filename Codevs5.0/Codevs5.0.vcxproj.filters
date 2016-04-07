@@ -36,6 +36,9 @@
     <Filter Include="ソース ファイル\AI\AI03">
       <UniqueIdentifier>{392e77eb-5b61-4008-b23e-00771ba858bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\AI\AI04">
+      <UniqueIdentifier>{b230d161-116f-4b1a-ba55-dc8612b2efcd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base.hpp">
@@ -71,6 +74,9 @@
     <ClInclude Include="AI03.hpp">
       <Filter>ソース ファイル\AI\AI03</Filter>
     </ClInclude>
+    <ClInclude Include="AI04.hpp">
+      <Filter>ソース ファイル\AI\AI04</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Base.cpp">
@@ -99,6 +105,9 @@
     </ClCompile>
     <ClCompile Include="AI03.cpp">
       <Filter>ソース ファイル\AI\AI03</Filter>
+    </ClCompile>
+    <ClCompile Include="AI04.cpp">
+      <Filter>ソース ファイル\AI\AI04</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
