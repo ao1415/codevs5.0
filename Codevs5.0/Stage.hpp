@@ -7,23 +7,25 @@ struct Character {
 	Point point;
 };
 
+typedef array<array<int, StageY>, StageX> StageArray;
+
 class Stage {
 public:
 
-	enum class State {
-		None,
-		Rock,
-		Wall,
-		Dog,
-		Soul,
-		Player,
+	enum class State : int {
+		None = 0x0000,
+		Rock = 0x0001,
+		Wall = 0x0002,
+		Player = 0x0004,
+		Dog = 0x0008,
+		Soul = 0x0010,
 	};
 
 	Stage() {
-		for (auto& s : stage) s.fill(State::Wall);
+		for (auto& s : stage) s.fill(int(State::Wall));
 	}
 
-	Stage(const array<array<State, StageY>, StageX>& s) {
+	Stage(const StageArray& s) {
 		stage = s;
 	}
 
@@ -37,9 +39,9 @@ public:
 				cin >> c;
 				switch (c)
 				{
-				case '_': stage[x][y] = State::None; break;
-				case 'O': stage[x][y] = State::Rock; break;
-				case 'W': stage[x][y] = State::Wall; break;
+				case '_': stage[x][y] = int(State::None); break;
+				case 'O': stage[x][y] = int(State::Rock); break;
+				case 'W': stage[x][y] = int(State::Wall); break;
 				}
 			}
 		}
@@ -47,16 +49,11 @@ public:
 		return true;
 	}
 
-	array<State, StageY>& operator[](int n) { return stage[n]; }
-	const array<array<State, StageY>, StageX>& getStage() const { return stage; }
+	array<int, StageY>& operator[](int n) { return stage[n]; }
+	const StageArray& getStage() const { return stage; }
 
-	const State& getState(const Point& p) const { return stage[p.x][p.y]; }
-
-	//有効な座標か調べる
-	bool checkPoint(const Point& p) const {
-		if (0 < p.x && p.x < StageX - 1) if (0 < p.y && p.x < StageY - 1) return true;
-		return false;
-	}
+	const int getState(const Point& p) const { return stage[p.x][p.y]; }
+	const bool getState(const Point& p, const State& s) const { return (stage[p.x][p.y] & int(s)) > 0; }
 
 	//コマンド実行した場合の移動結果の座標とステージの状態を取得する
 	static const Point moveSimulation(const Point& p, MoveCommand c, Stage& sta) {
@@ -151,8 +148,6 @@ public:
 
 private:
 
-	array<array<State, StageY>, StageX> stage;//stage[x][y]
+	StageArray stage;//stage[x][y]
 
 };
-
-typedef array<array<Stage::State, StageY>, StageX> StageArray;

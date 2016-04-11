@@ -51,6 +51,10 @@ struct Point {
 
 	const bool operator== (const Point &p) const { return (this->x == p.x && this->y == p.y); }
 	const bool operator!= (const Point &p) const { return !(*this == p); }
+
+	const bool inside() const { return (0 < x && x < StageX - 1 && 0 < y && y < StageY - 1); }
+
+
 };
 
 const Point directionPoint[4] = { Point(0,-1),Point(-1,0),Point(1,0),Point(0,1) };
@@ -70,8 +74,8 @@ enum class NinjutsuCommand {
 };
 
 int manhattan(const Point& p1, const Point& p2);
-const Point getRunCommandPoint(Point p, const vector<MoveCommand>& com);
+
 //(x,y)
-const string pointToString(const Point& p);
+const string point2String(const Point& p);
 //y x
-const string pointToString2(const Point& p);
+const string point2String2(const Point& p);

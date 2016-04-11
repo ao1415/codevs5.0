@@ -33,7 +33,7 @@ public:
 	}
 
 	void think() {
-		ai04.think(my, enemy);
+		ai04.think(my, enemy,limitTime);
 	}
 
 	void Control::output() {

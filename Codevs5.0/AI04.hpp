@@ -5,7 +5,7 @@
 class AI04 {
 public:
 
-	void think(const Status& my, const Status& enemy);
+	void think(const Status& my, const Status& enemy, const int limit);
 	void output() {
 
 		if (ninjutsuFlag)
