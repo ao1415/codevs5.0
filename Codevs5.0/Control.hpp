@@ -1,8 +1,6 @@
 #pragma once
 
-#include "AI01.hpp"
-#include "AI02.hpp"
-#include "AI03.hpp"
+#include "AI04.hpp"
 
 class Control {
 public:
@@ -10,7 +8,7 @@ public:
 	Control() {
 		//ai.reset(new AI01());
 		//ai.reset(new AI02());
-		ai.reset(new AI03());
+		//ai.reset(new AI03());
 	}
 
 	void reset() {
@@ -35,11 +33,11 @@ public:
 	}
 
 	void think() {
-		ai->think(my, enemy);
+		ai04.think(my, enemy);
 	}
 
 	void Control::output() {
-		ai->output();
+		ai04.output();
 	}
 
 private:
@@ -50,6 +48,6 @@ private:
 	Status my;
 	Status enemy;
 
-	unique_ptr<BaseAI> ai;
+	AI04 ai04;
 
 };

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "BaseAI.hpp"
+#include "Status.hpp"
 
-class AI04 : public BaseAI {
+class AI04 {
 public:
 
 	void think(const Status& my, const Status& enemy);
@@ -36,6 +36,8 @@ public:
 
 private:
 
+	bool ninjutsuFlag=false;
+	string ninjutsuString = "";
 	array<string, 2> outputCommand;
 
 

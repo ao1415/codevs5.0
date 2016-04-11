@@ -18,24 +18,6 @@
     <Filter Include="ソース ファイル\AI">
       <UniqueIdentifier>{3633e79e-a993-44f4-82a0-d4154a82abb6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\AI\AI01">
-      <UniqueIdentifier>{41c8c888-6436-4231-aa0b-848dfa58c066}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Control\DogEscape">
-      <UniqueIdentifier>{5d00bcb3-9cc5-4b18-826a-c44d2a4355b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Control\DogEscape\DogSimulation">
-      <UniqueIdentifier>{92057d7d-c897-43e0-bf82-0f6674e4e612}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Control\SoulFind">
-      <UniqueIdentifier>{729903b1-30bc-4fbf-af31-cd475bf71a5d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\AI\AI02">
-      <UniqueIdentifier>{35e01724-b947-4f68-ad89-bb05d3f0d71e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\AI\AI03">
-      <UniqueIdentifier>{392e77eb-5b61-4008-b23e-00771ba858bb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\AI\AI04">
       <UniqueIdentifier>{b230d161-116f-4b1a-ba55-dc8612b2efcd}</UniqueIdentifier>
     </Filter>
@@ -47,32 +29,11 @@
     <ClInclude Include="Control.hpp">
       <Filter>ソース ファイル\Control</Filter>
     </ClInclude>
-    <ClInclude Include="AI01.hpp">
-      <Filter>ソース ファイル\AI\AI01</Filter>
-    </ClInclude>
-    <ClInclude Include="DogEscape.hpp">
-      <Filter>ソース ファイル\Control\DogEscape</Filter>
-    </ClInclude>
-    <ClInclude Include="DogSimulation.hpp">
-      <Filter>ソース ファイル\Control\DogEscape\DogSimulation</Filter>
-    </ClInclude>
     <ClInclude Include="Stage.hpp">
       <Filter>ソース ファイル\Status</Filter>
     </ClInclude>
     <ClInclude Include="Status.hpp">
       <Filter>ソース ファイル\Status</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseAI.hpp">
-      <Filter>ソース ファイル\AI</Filter>
-    </ClInclude>
-    <ClInclude Include="SoulFind.hpp">
-      <Filter>ソース ファイル\Control\SoulFind</Filter>
-    </ClInclude>
-    <ClInclude Include="AI02.hpp">
-      <Filter>ソース ファイル\AI\AI02</Filter>
-    </ClInclude>
-    <ClInclude Include="AI03.hpp">
-      <Filter>ソース ファイル\AI\AI03</Filter>
     </ClInclude>
     <ClInclude Include="AI04.hpp">
       <Filter>ソース ファイル\AI\AI04</Filter>
@@ -87,24 +48,6 @@
     </ClCompile>
     <ClCompile Include="Control.cpp">
       <Filter>ソース ファイル\Control</Filter>
-    </ClCompile>
-    <ClCompile Include="AI01.cpp">
-      <Filter>ソース ファイル\AI\AI01</Filter>
-    </ClCompile>
-    <ClCompile Include="DogEscape.cpp">
-      <Filter>ソース ファイル\Control\DogEscape</Filter>
-    </ClCompile>
-    <ClCompile Include="DogSimulation.cpp">
-      <Filter>ソース ファイル\Control\DogEscape\DogSimulation</Filter>
-    </ClCompile>
-    <ClCompile Include="SoulFind.cpp">
-      <Filter>ソース ファイル\Control\SoulFind</Filter>
-    </ClCompile>
-    <ClCompile Include="AI02.cpp">
-      <Filter>ソース ファイル\AI\AI02</Filter>
-    </ClCompile>
-    <ClCompile Include="AI03.cpp">
-      <Filter>ソース ファイル\AI\AI03</Filter>
     </ClCompile>
     <ClCompile Include="AI04.cpp">
       <Filter>ソース ファイル\AI\AI04</Filter>
