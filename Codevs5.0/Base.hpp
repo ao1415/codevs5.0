@@ -1,4 +1,5 @@
 #pragma once
+#undef NDEBUG
 
 #include <iostream>
 
@@ -16,7 +17,9 @@
 #include <memory>
 #include <algorithm>
 #include <functional>
+
 #include <climits>
+#include <cassert>
 
 #include <random>
 #include <chrono>
