@@ -301,9 +301,12 @@ private:
 				const Point p = dogPoint + dire;
 				if (!nextStage.getState(p, Stage::State::Dog))
 				{
-					nextStage.deleteState(dogPoint, Stage::State::Dog);
-					nextStage.setState(dogPoint, Stage::State::Dog);
-					nextDogs[dog.second] = { dog.second,p };
+					if (dog.first > rangeTable[p.x][p.y])
+					{
+						nextStage.deleteState(dogPoint, Stage::State::Dog);
+						nextStage.setState(p, Stage::State::Dog);
+						nextDogs[dog.second] = { dog.second,p };
+					}
 				}
 			}
 		}
