@@ -38,6 +38,9 @@
     <ClInclude Include="AI04.hpp">
       <Filter>ソース ファイル\AI\AI04</Filter>
     </ClInclude>
+    <ClInclude Include="StatusPlus.hpp">
+      <Filter>ソース ファイル\AI\AI04</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Base.cpp">

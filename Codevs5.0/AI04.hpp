@@ -40,6 +40,4 @@ private:
 	string ninjutsuString = "";
 	array<string, 2> outputCommand;
 
-
-
 };

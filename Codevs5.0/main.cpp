@@ -1,6 +1,7 @@
 #include "Control.hpp"
 
 NinjutsuArray Status::ninjutsuCost;
+NinjutsuArray Status::ninjutsuNumber;
 
 int main() {
 

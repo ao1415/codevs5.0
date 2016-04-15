@@ -31,7 +31,7 @@ const int StageY = 17;
 const int NinjutsuNum = 8;
 
 typedef array<int, NinjutsuNum> NinjutsuArray;
-#define For(v, n) for (int v = 0; v < (n); v++)
+#define For(v, n) for (int v = 0; v < int(n); v++)
 
 /*
 auto start = chrono::system_clock::now();

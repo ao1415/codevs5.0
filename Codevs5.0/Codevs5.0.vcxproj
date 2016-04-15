@@ -150,6 +150,7 @@
     <ClInclude Include="Control.hpp" />
     <ClInclude Include="Stage.hpp" />
     <ClInclude Include="Status.hpp" />
+    <ClInclude Include="StatusPlus.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AI04.cpp" />

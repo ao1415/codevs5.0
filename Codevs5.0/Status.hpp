@@ -5,9 +5,7 @@
 class Status {
 public:
 
-	Status() {
-		ninjutsuNumber.fill(0);
-	}
+	Status() { setScore(); }
 
 	Status(const Stage& _stage, const array<Character, 2>& _ninjas, const map<int, Character>& _dogs, const int& _ninryoku, const vector<Point>& _soulPoints) {
 		stage = _stage;
@@ -15,7 +13,10 @@ public:
 		dogs = _dogs;
 		ninryoku = _ninryoku;
 		soulPoints = _soulPoints;
+		setScore();
 	}
+
+	const bool operator<(const Status& s) const { return score < s.score; }
 
 	static void reset() {
 		ninjutsuCost.fill(INT16_MAX);
@@ -117,7 +118,7 @@ public:
 	void setNinryoku(const int& n) { ninryoku = n; }
 	void setSoulPoints(const vector<Point>& s) { soulPoints = s; }
 
-	const Status nextStatus(const string& com1, const string& com2) {
+	const Status nextStatus(const string& com1, const string& com2) const {
 
 		auto func = [](const Point& p, const int id, const Point& add, Stage& stage) {
 			const Point p1 = p + add;
@@ -180,6 +181,7 @@ public:
 		auto nextNinjas = ninjas;
 		int nextNinryoku = ninryoku;
 		auto nextSouls = soulPoints;
+		int soulCount = 0;
 
 		const string coms[] = { com1,com2 };
 		For(i, 2)
@@ -208,30 +210,34 @@ public:
 				if (nextStage.getState(nextNinjas[i].point, Stage::State::Soul))
 				{
 					nextNinryoku += 2;
+					soulCount++;
 					for (auto it = nextSouls.begin(); it != nextSouls.end();)
 					{
 						if ((*it) == nextNinjas[i].point) it = nextSouls.erase(it);
 						else ++it;
 					}
-					stage.deleteState(nextNinjas[i].point, Stage::State::Soul);
+					nextStage.deleteState(nextNinjas[i].point, Stage::State::Soul);
 				}
 			}
 		}
 
 		const auto rangeTable = getRangeTable(nextNinjas[0].point, nextNinjas[1].point, nextStage);
 		auto nextDogs = getNextDogs(nextStage, rangeTable);
+		//auto nextDogs = dogs;
 
 		return Status(nextStage, nextNinjas, nextDogs, nextNinryoku, nextSouls);
 	}
+
+	const int getScore() const { return score; }
 
 private:
 
 	//忍術のコスト
 	static NinjutsuArray ninjutsuCost;
+	//忍術の使用回数
+	static NinjutsuArray ninjutsuNumber;
 	//ステージ
 	Stage stage;
-	//忍術の使用回数
-	NinjutsuArray ninjutsuNumber;
 
 	//ストックされている忍力
 	int ninryoku = 0;
@@ -242,7 +248,9 @@ private:
 	//ニンジャソウルの場所
 	vector<Point> soulPoints;
 
-	const StageArray getRangeTable(const Point& p1, const Point& p2, const Stage& s) {
+	int score = 0;
+
+	const StageArray getRangeTable(const Point& p1, const Point& p2, const Stage& s) const {
 		StageArray rangeTable;
 		for (auto& rs : rangeTable) rs.fill(INT32_MAX);
 
@@ -278,7 +286,7 @@ private:
 		}
 		return rangeTable;
 	}
-	const map<int, Character> getNextDogs(Stage& nextStage, const StageArray& rangeTable) {
+	const map<int, Character> getNextDogs(Stage& nextStage, const StageArray& rangeTable) const {
 		map<int, Character> nextDogs;
 
 		vector<pair<int, int>> dogsOrder;
@@ -312,6 +320,49 @@ private:
 		}
 
 		return nextDogs;
+	}
+
+	void setHash() {
+
+	}
+	void setScore() {
+
+		const auto dogJudge = [&]() {
+			for (const auto& ninja : ninjas)
+			{
+				if (stage.getState(ninja.point, Stage::State::Dog))
+					return true;
+			}
+			return false;
+		};
+
+		const auto soulScore = [&]() {
+			return ninryoku;
+		};
+		const auto soulRange = [&]() {
+			int range[2] = { INT32_MAX,INT32_MAX };
+			for (const auto& sp : soulPoints)
+			{
+				range[0] = min(range[0], manhattan(ninjas[0].point, sp));
+				range[1] = min(range[1], manhattan(ninjas[1].point, sp));
+			}
+			return (StageX + StageY) - (range[0] + range[1]);
+		};
+
+		const auto ninjaRange = [&]() {
+			return manhattan(ninjas[0].point, ninjas[1].point);
+		};
+
+		if (dogJudge())
+		{
+			score = INT16_MIN;
+			return;
+		}
+
+		score += 64 * soulScore();
+		score += 8 * soulRange();
+		score += 4 * ninjaRange();
+
 	}
 
 };
